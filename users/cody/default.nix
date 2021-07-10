@@ -13,7 +13,8 @@
     ];
   };
 
-  home-manager.users.cody = {
+  home-manager.users.cody = { suites, ... }: {
+    imports = suites.base;
 
     # shouldn't this clash with environment.sessionVariables in develop/default.nix?
     home.sessionVariables = {
@@ -45,16 +46,16 @@
   };
 
 
-  home-manager.users.cody.home.file = {
-      ".local/share/applications/org-protocol.desktop".text = ''
-        [Desktop Entry]
-        Name=org-protocol
-        Exec=emacsclient %u
-        Type=Application
-        Terminal=false
-        Categories=System;
-        MimeType=x-scheme-handler/org-protocol;
-      '';
-  };
+  # home-manager.users.cody.home.file = {
+  #     ".local/share/applications/org-protocol.desktop".text = ''
+  #       [Desktop Entry]
+  #       Name=org-protocol
+  #       Exec=emacsclient %u
+  #       Type=Application
+  #       Terminal=false
+  #       Categories=System;
+  #       MimeType=x-scheme-handler/org-protocol;
+  #     '';
+  # };
 
 }
