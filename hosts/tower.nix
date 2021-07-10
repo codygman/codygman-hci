@@ -2,5 +2,5 @@
 {
   imports = [
     ../up/tower/configuration.nix
-  ] ++ suites.base;
+  ] ++ suites.hci;
 }
