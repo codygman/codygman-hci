@@ -22,6 +22,11 @@
     libinput.enable = true;
   };
   home-manager.users.cody = {
+    home.file = {
+    ".config/i3/config" = {
+      source = ./config;
+      };
+    };
     services = {
       dunst.enable = true;
       polybar = {
@@ -56,6 +61,6 @@
 
       };
       picom.enable = true;
-    }:
+    };
   };
 }
