@@ -56,7 +56,7 @@ in
   services.gnome3.gnome-keyring.enable = true;
 
   services.duplicati = {
-    enable = true;
+    enable = false;
     user = "cody";
   };
   
