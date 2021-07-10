@@ -1,35 +1,61 @@
-[![NixOS](https://img.shields.io/badge/NixOS-unstable-blue.svg?style=flat&logo=NixOS&logoColor=white)](https://nixos.org)
+[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/32678)
 [![MIT License](https://img.shields.io/github/license/divnix/devos)][mit]
-[![Chat](https://img.shields.io/matrix/devos:nixos.org.svg?label=%23devos%3Anixos.org&logo=matrix&server_fqdn=matrix.org)][matrix]
+[![NixOS](https://img.shields.io/badge/NixOS-unstable-blue.svg?style=flat&logo=NixOS&logoColor=white)](https://nixos.org)
 
 > #### ⚠ Advisory ⚠
 > DevOS requires the [flakes][flakes] feature available via an _experimental_
-> branch of [nix][nix]. Until nix 2.4 is released, this project
-> should be considered unstable.
+> branch of [nix][nix]. Until nix 3.0 is released, this project
+> should be considered unstable, though quite usable as flakes have been
+> maturing _well_ [for a while](https://github.com/divnix/devos/tree/17713c22d07c54525c728c62060a0428b76dee3b).
 
-### Why?
-Make an awesome template for NixOS users, with consideration for common tools like [home-manager][home-manager],
+# Introduction
+DevOS grants a simple template to use, deploy and manage [NixOS][nixos] systems 
+for personal and productive use. A sane repository structure is provided,
+integrating several popular projects like [home-manager][home-manager],
 [devshell][devshell], and [more](./doc/integrations).
 
-### No. Why _flakes_?
-Flakes are a part of an explicit push to improve [Nix's UI](https://github.com/NixOS/nix/blob/master/doc/manual/src/contributing/cli-guideline.md), and have become an intergral part of that effort. 
+Striving for ___nix first™___ solutions with unobstrusive implementations,
+a [flake centric][flake-doc] approach is taken for useful conveniences such as
+[automatic source updates](./pkgs#automatic-source-updates).
 
-They also make [Nix expressions](https://nixos.org/manual/nix/unstable/expressions/expression-syntax.html) easier to distribute and reuse with convient [flake references](https://github.com/NixOS/nix/blob/master/src/nix/flake.md#flake-references) for building or using packages, modules, and whole systems.
-
-## Getting Started
-Check out the [guide](https://devos.divnix.com/start) to get up and running.
-Also, have a look at [_flake.nix_][toc]. If anything is not immediately 
-discoverable via "[`digga`][digga]'s [`mkFlake`][mk-flake],
-please file a bug report.
+Skip the indeterminate nature of other systems, _and_ the perceived
+tedium of bootstrapping Nix. It's easier than you think!
 
 ### Status: Beta
 Although this project has already matured quite a bit, especially through
 recent outfactoring of [`digga`][digga], a fair amount of api polishing is still
 expected. There are unstable versions (0._x_._x_) to help users keep track
-of changes and progress, and a [`develop`](https://github.com/divnix/devos/tree/develop) branch for the brave 😜
+of changes and progress.
+
+## Getting Started
+Check out the [guide](https://devos.divnix.com/start) to get up and running.
+Also, have a look at [_flake.nix_][toc]. If anything is not immediately 
+discoverable from there through [`digga`][digga] library's [`mkFlake`][mk-flake],
+please file a bug report.
 
 ## In the Wild
-* The original [authors][please]
+The author maintains his own branch, so you can take inspiration, direction, or
+make critical comments about the [code][please]. 😜
+
+## Motivation
+NixOS provides an amazing abstraction to manage our environment, but that new
+power can sometimes bring feelings of overwhelm and confusion. Having a turing
+complete system can easily lead to unlimited complexity if we do it wrong.
+Instead, we should have a community consensus on how to manage a NixOS system
+and its satellite projects, from which best practices can evolve.
+
+___The future is declarative! 🎉___
+
+## Community Profiles
+There are two branches from which to choose: [core][core] and
+[community][community]. The community branch builds on core and includes
+several ready-made profiles for discretionary use.
+
+Every package and NixOS profile declared in community is uploaded to
+[cachix](./integrations/cachix.md), so everything provided is available
+without building anything. This is especially useful for the packages that are
+[overridden](./concepts/overrides.md) from master, as without the cache,
+rebuilds are quite frequent.
 
 ## Shoulders
 This work does not reinvent the wheel. It stands on the [shoulders of the
@@ -43,6 +69,7 @@ following giants][giants]:
 ### :family: &mdash; like family
 - [`numtide/devshell`][devshell]
 - [`serokell/deploy-rs`][deploy]
+- [`berberman/nvfetcher`][nvfetcher]
 - [`NixOS/nixpkgs`][nixpkgs]
 
 :heart:
@@ -68,23 +95,23 @@ goals are sufficiently upstreamed into "the Nix", dissolved.
 # License
 DevOS is licensed under the [MIT License][mit].
 
-[mk-flake]: https://github.com/divnix/digga/tree/master/src/mkFlake
-[nixpkgs]: https://github.com/NixOS/nixpkgs
-[deploy]: https://github.com/serokell/deploy-rs
-[toc]: https://github.com/divnix/devos/blob/core/flake.nix
-[giants]: https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants
-[digga]: https://github.com/divnix/digga
-[fup]: https://github.com/gytis-ivaskevicius/flake-utils-plus
-[fu]: https://github.com/numtide/flake-utils
-[devshell]: https://github.com/numtide/devshell
-[nix]: https://nixos.org/manual/nix/stable
-[mit]: https://mit-license.org
-[nixos]: https://nixos.org/manual/nixos/stable
-[home-manager]: https://nix-community.github.io/home-manager
-[flakes]: https://nixos.wiki/wiki/Flakes
-[flake-doc]: https://github.com/NixOS/nix/blob/master/src/nix/flake.md
-[core]: https://github.com/divnix/devos
 [community]: https://github.com/divnix/devos/tree/community
+[core]: https://github.com/divnix/devos
+[deploy]: https://github.com/serokell/deploy-rs
+[devshell]: https://github.com/numtide/devshell
+[digga]: https://github.com/divnix/digga
 [dotfiles]: https://github.com/hlissner/dotfiles
+[flake-doc]: https://github.com/NixOS/nix/blob/master/src/nix/flake.md
+[flakes]: https://nixos.wiki/wiki/Flakes
+[fu]: https://github.com/numtide/flake-utils
+[fup]: https://github.com/gytis-ivaskevicius/flake-utils-plus
+[giants]: https://en.wikipedia.org/wiki/Standing_on_the_shoulders_of_giants
+[home-manager]: https://nix-community.github.io/home-manager
+[mit]: https://mit-license.org
+[mk-flake]: https://github.com/divnix/digga/tree/master/src/mkFlake
+[nix]: https://nixos.org/manual/nix/stable
+[nixos]: https://nixos.org/manual/nixos/stable
+[nixpkgs]: https://github.com/NixOS/nixpkgs
+[nvfetcher]: https://github.com/berberman/nvfetcher
 [please]: https://github.com/nrdxp/devos/tree/nrd
-[matrix]: https://matrix.to/#/#devos:nixos.org
+[toc]: https://github.com/divnix/devos/blob/core/flake.nix

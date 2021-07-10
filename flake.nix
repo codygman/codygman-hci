@@ -3,9 +3,19 @@
 
   inputs =
     {
-      nixos.url = "nixpkgs/nixos-unstable";
+      nixos.url = "nixpkgs/release-21.05";
       latest.url = "nixpkgs";
-      digga.url = "github:divnix/digga/master";
+      digga = {
+        url = "github:divnix/digga/develop";
+        inputs.nipxkgs.follows = "latest";
+        inputs.deploy.follows = "deploy";
+      };
+      bud.url = "github:divnix/bud"; # no need to follow nixpkgs: it never materialises
+      deploy.url = "github:serokell/deploy-rs";
+      deploy.inputs.nixpkgs.follows = "nixos";
+
+      # remove after https://github.com/NixOS/nix/pull/4641
+      nixpkgs.follows = "nixos";
 
       ci-agent = {
         url = "github:hercules-ci/hercules-ci-agent";
@@ -13,30 +23,35 @@
       };
       darwin.url = "github:LnL7/nix-darwin";
       darwin.inputs.nixpkgs.follows = "latest";
-      home.url = "github:nix-community/home-manager";
+      home.url = "github:nix-community/home-manager/release-21.05";
       home.inputs.nixpkgs.follows = "nixos";
-      naersk.url = "github:nmattia/naersk";
-      naersk.inputs.nixpkgs.follows = "latest";
+      # naersk.url = "github:nmattia/naersk";
+      # naersk.inputs.nixpkgs.follows = "latest";
       agenix.url = "github:ryantm/agenix";
       agenix.inputs.nixpkgs.follows = "latest";
       nixos-hardware.url = "github:nixos/nixos-hardware";
 
-      pkgs.url = "path:./pkgs";
-      pkgs.inputs.nixpkgs.follows = "nixos";
+      nvfetcher.url = "github:berberman/nvfetcher";
+      nvfetcher.inputs.nixpkgs.follows = "latest";
     };
 
   outputs =
     { self
-    , pkgs
     , digga
+    , bud
     , nixos
     , ci-agent
     , home
     , nixos-hardware
     , nur
     , agenix
+    , nvfetcher
+    , deploy
     , ...
     } @ inputs:
+    let
+      bud' = bud self; # rebind to access self.budModules
+    in
     digga.lib.mkFlake {
       inherit self inputs;
 
@@ -46,10 +61,11 @@
         nixos = {
           imports = [ (digga.lib.importers.overlays ./overlays) ];
           overlays = [
-            ./pkgs/default.nix
-            pkgs.overlay # for `srcs`
             nur.overlay
             agenix.overlay
+            nvfetcher.overlay
+            deploy.overlay
+            ./pkgs/default.nix
           ];
         };
         latest = { };
@@ -59,6 +75,7 @@
 
       sharedOverlays = [
         (final: prev: {
+          __dontExport = true;
           lib = prev.lib.extend (lfinal: lprev: {
             our = self.lib;
           });
@@ -69,13 +86,13 @@
         hostDefaults = {
           system = "x86_64-linux";
           channelName = "nixos";
-          modules = ./modules/module-list.nix;
+          imports = [ (digga.lib.importers.modules ./modules) ];
           externalModules = [
-            { _module.args.ourLib = self.lib; }
+            { lib.our = self.lib; }
             ci-agent.nixosModules.agent-profile
             home.nixosModules.home-manager
             agenix.nixosModules.age
-            ./modules/customBuilds.nix
+            (bud.nixosModules.bud bud')
           ];
         };
 
@@ -97,7 +114,7 @@
       };
 
       home = {
-        modules = ./users/modules/module-list.nix;
+        imports = [ (digga.lib.importers.modules ./users/modules) ];
         externalModules = [ ];
         importables = rec {
           profiles = digga.lib.importers.rakeLeaves ./users/profiles;
@@ -107,18 +124,20 @@
         };
       };
 
-      devshell.externalModules = { pkgs, ... }: {
-        packages = [ pkgs.agenix ];
-      };
+      devshell.modules = [ (import ./shell bud') ];
 
       homeConfigurations = digga.lib.mkHomeConfigurations self.nixosConfigurations;
 
       deploy.nodes = digga.lib.mkDeployNodes self.nixosConfigurations { };
 
-      defaultTemplate = self.templates.flk;
-      templates.flk.path = ./.;
-      templates.flk.description = "flk template";
+      defaultTemplate = self.templates.bud;
+      templates.bud.path = ./.;
+      templates.bud.description = "bud template";
 
+    }
+    //
+    {
+      budModules = { devos = import ./pkgs/bud; };
     }
   ;
 }
