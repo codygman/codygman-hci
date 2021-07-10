@@ -21,37 +21,41 @@
     #    };
     libinput.enable = true;
   };
-  home-manager.users.cody.services.dunst.enable = true;
-  home-manager.users.cody.services.polybar = {
-    enable = false;
-    package = pkgs.polybar.override {
-      pulseSupport = true;
-      githubSupport = true;
-    };
-    config = {
-      "bar/top" = {
-        width = "100%";
-        height = "1.4%";
-        background = "#002E3440";
-        module-margin = 5;
-        modules-right = "date";
-        tray-position = "right";
-        tray-max-size = 10;
-      };
-      "module/date" = {
-        type = "internal/date";
-        internal = 5;
-        date = "%Y.%m.%d";
-        time = "%H:%M:%S";
-        label = "%date% %time%  ";
-      };
-      "module/pulseaudio" = {
-        type = "internal/pulseaudio";
-        # sink = "alsa_output.usb-Topping_E30-00.analog-stereo";
-      };
-    };
-    script = "polybar top &";
+  home-manager.users.cody = {
+    services = {
+      dunst.enable = true;
+      polybar = {
+        enable = false;
+        package = pkgs.polybar.override {
+          pulseSupport = true;
+          githubSupport = true;
+        };
+        config = {
+          "bar/top" = {
+            width = "100%";
+            height = "1.4%";
+            background = "#002E3440";
+            module-margin = 5;
+            modules-right = "date";
+            tray-position = "right";
+            tray-max-size = 10;
+          };
+          "module/date" = {
+            type = "internal/date";
+            internal = 5;
+            date = "%Y.%m.%d";
+            time = "%H:%M:%S";
+            label = "%date% %time%  ";
+          };
+          "module/pulseaudio" = {
+            type = "internal/pulseaudio";
+            # sink = "alsa_output.usb-Topping_E30-00.analog-stereo";
+          };
+        };
+        script = "polybar top &";
 
+      };
+      picom.enable = true;
+    }:
   };
-  home-manager.users.cody.services.picom.enable = true;
 }
