@@ -12,16 +12,16 @@
     # };
     windowManager.i3.enable = true; # default bindings clash with emacs copy
     # windowManager.stumpwm.enable = true; # kinda cool, but would have to make my own talon integration
-#    windowManager.session = lib.singleton {
-#      name = "exwm";
-#      start = ''
-#        export EDITOR='emacsclient -t -a emacs'
-#        $EDITOR
-#      '';
-#    };
+    #    windowManager.session = lib.singleton {
+    #      name = "exwm";
+    #      start = ''
+    #        export EDITOR='emacsclient -t -a emacs'
+    #        $EDITOR
+    #      '';
+    #    };
     libinput.enable = true;
   };
- home-manager.users.cody.services.dunst.enable = true;
+  home-manager.users.cody.services.dunst.enable = true;
   home-manager.users.cody.services.polybar = {
     enable = false;
     package = pkgs.polybar.override {
