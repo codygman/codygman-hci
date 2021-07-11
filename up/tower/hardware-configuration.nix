@@ -13,6 +13,8 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+  services.xserver.videoDrivers = [ "nvidia" ];
+
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/6d6f358f-23e7-475d-a8b6-2d9be7601611";
       fsType = "ext4";
