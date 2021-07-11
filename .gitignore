@@ -15,3 +15,5 @@ pkgs/_sources/.shake*
 /users/profiles/emacs/emacs-config/tmp/
 /users/profiles/emacs/emacs-config/vanilla.el
 /users/profiles/emacs/emacs-config/vanilla.el~
+/users/profiles/emacs/emacs-config/recentf
+/users/profiles/emacs/emacs-config/transient/
