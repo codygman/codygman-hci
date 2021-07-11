@@ -378,7 +378,7 @@ reflow: key(alt-q)
 toggle read only: key(ctrl-x ctrl-q)
 lines only: key(ctrl-c c l)
 
-lines with <user.text>$:
+lines [with] <user.text>$:
   key(ctrl-c c l)
   user.insert_formatted(text + " ", "NOOP")
 
@@ -720,7 +720,7 @@ rome yesterday:
 rome date:
   user.emacs_command("org-roam-dailies-find-date")
 
-completion at point:
+completion [at point]:
   user.emacs_command("completion-at-point")
 
 I three help:
