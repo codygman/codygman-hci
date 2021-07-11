@@ -5,8 +5,8 @@ app: emacs
 
 command help:
   user.emacs_command("dired-other-window")
-#   user.insert_formatted("/home/cody/devos2/profiles/develop/emacs/config/talon/emacs-talon/modes/" + user.emacs_mode, "NOOP")
-  user.insert_formatted("/home/cody/devos2/profiles/develop/emacs/config/talon/emacs-talon/modes/", "NOOP")
+#   user.insert_formatted("/home/cody/hci/users/profiles/talon/user/emacs-talon/modes" + user.emacs_mode, "NOOP")
+  user.insert_formatted("/home/cody/hci/users/profiles/talon/user/emacs-talon/modes", "NOOP")
   key(enter)
 
 # my config
@@ -34,15 +34,8 @@ line kill:
 
 configuration go:
   user.emacs_command("find-file-other-window")
-  user.insert_formatted("/home/cody/devos2/profiles/develop/emacs/config/vanilla.org", "NOOP")
+  user.insert_formatted("/home/cody/hci/users/profiles/emacs/vanilla.org", "NOOP")
   key(enter)
-
-# actually I'm not quite sure which file this would go to
-# (nix | nick) configuration go:
-#   user.emacs_command("find-file-other-window")
-#   user.insert_formatted("~/devos2/profiles/develop/emacs/config/vanilla.org", "NOOP")
-#   key(enter)
-
 
 # TODO how do you make an alias for some other action already defined?
 # clear: actions.user.generic_editor.clear_line()
