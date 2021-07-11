@@ -6,8 +6,6 @@
       aphelia-mode = pkgs.aphelia-mode;
       # ...
     };    
-    extraPackages = import ./emacs-packages.nix;
+    extraPackages = import ./emacs-packages.nix {pkgs=pkgs;};
   };
 }
-
-  
