@@ -653,7 +653,7 @@ When I added this I got some nix cache erros... not sure if I did something wron
 gh-notify
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package gh-notify)
   #+end_src
 
