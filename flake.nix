@@ -119,7 +119,7 @@
         importables = rec {
           profiles = digga.lib.importers.rakeLeaves ./users/profiles;
           suites = with profiles; rec {
-            base = [ direnv git emacs ];
+            base = [ direnv git emacs firefox ];
           };
         };
       };
