@@ -108,7 +108,7 @@
           };
           suites = with profiles; rec {
             base = [ core users.cody users.root ];
-            hci = base ++ [graphical];
+            hci = base ++ [graphical develop];
           };
         };
       };
