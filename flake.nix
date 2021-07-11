@@ -3,11 +3,11 @@
 
   inputs =
     {
-      nixos.url = "nixpkgs/release-21.05";
+      nixos.url = "nixpkgs/nixos-unstable";
       latest.url = "nixpkgs";
       digga = {
         url = "github:divnix/digga/develop";
-        inputs.nipxkgs.follows = "latest";
+        inputs.nixpkgs.follows = "latest";
         inputs.deploy.follows = "deploy";
       };
       bud.url = "github:divnix/bud"; # no need to follow nixpkgs: it never materialises
@@ -23,7 +23,7 @@
       };
       darwin.url = "github:LnL7/nix-darwin";
       darwin.inputs.nixpkgs.follows = "latest";
-      home.url = "github:nix-community/home-manager/release-21.05";
+      home.url = "github:nix-community/home-manager";
       home.inputs.nixpkgs.follows = "nixos";
       # naersk.url = "github:nmattia/naersk";
       # naersk.inputs.nixpkgs.follows = "latest";
