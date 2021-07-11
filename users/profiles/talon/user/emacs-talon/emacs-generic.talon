@@ -29,6 +29,9 @@ scratch:
 only:
   key(ctrl-x 1)
 
+(find | fine) file:
+  key(ctrl-x ctrl-f)
+  
 line kill:
   key(ctrl-k)
 
