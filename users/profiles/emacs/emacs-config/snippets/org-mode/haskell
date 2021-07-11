@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: haskell 
+# key: hs
+# --
+#+name: `(string-trim (shell-command-to-string "shortuuid"))`
+#+begin_src haskell
+$1
+#+end_src
+$0

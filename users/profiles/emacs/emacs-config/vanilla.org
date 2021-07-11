@@ -1,0 +1,2602 @@
+% -*- coding: utf-8 -*-
+#+STARTUP: overview
+#+PROPERTY: header-args :results silent :tangle yes
+
+* Handle configuration with use-package
+
+** setup use-package
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+use-package
+#+end_src
+
+#+begin_src emacs-lisp
+(require 'use-package)
+#+end_src
+
+
+** Ensure nix emacs package installation is always used
+
+*** packages are pulled with nix
+
+**** example
+
+    #+begin_src org :tangle no
+      ,#+begin_src nix :noweb-ref emacs-package :tangle no
+      use-package
+      ,#+end_src
+    #+end_src
+
+
+*** prevent use-package from pulling packages
+
+**** Set ensure-function to nil
+
+    #+begin_src emacs-lisp
+      (setq use-package-ensure-function 'ignore)
+    #+end_src
+
+
+**** Set package-archives to nil so there's nothing to install from
+
+    Package should already be there, to add a new one add it to home.nix
+
+    #+begin_src emacs-lisp
+      (setq package-archives nil)
+    #+end_src
+
+
+
+*** Note though that packages are configured with [[*setup use-package][use-package]]
+
+
+
+
+* Functionality
+
+** miscellaneous functions
+
+#+name: 85AHyvGXxkW6pYZNnru6s7
+#+begin_src emacs-lisp
+  ;; (defun my-org-export-as-org ()
+  ;; (let)
+  ;;     )
+  (defun stub-haskell-function ()
+    (interactive)
+    (mark-paragraph)
+    (next-line)
+    (beginning-of-line)
+    ;; (push-mark)
+    (set-mark-command nil)
+    (forward-word)
+    (kill-ring-save (mark) (point))
+    (mark-paragraph)
+    (comment-dwim nil)
+    (haskell-indentation-newline-and-indent)
+    (yank)
+    (insert "= undefined")
+    )
+#+end_src
+
+#+name: 3j7ok5T888jHTgmMYfmmJe
+#+begin_src emacs-lisp
+  (defun persistent-import-all ()
+    (interactive)
+    (haskell-navigate-imports)
+    (forward-paragraph)
+    (insert "import Database.Persist ((==.))
+  import qualified Database.Persist.Sql as Persist
+  import qualified Database.Persist.TH as Persist
+  ")
+    (haskell-navigate-imports-return)
+    )
+#+end_src
+
+#+name: h9JCnwLLgqMKjXGU5XC6M9
+#+begin_src emacs-lisp
+
+  (defun haskell-data-remove-field-prefix (prefix start end)
+    "Convert `({|,) fooBar` into `({|,}) bar` given prefix `foo`"
+    (interactive "r")
+    (remove-prefix-in-region prefix)
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char 1)
+      (let ((case-fold-search nil))
+        (while (search-forward-regexp " \\([{,].\\)\\([[:upper:]]\\)" nil t)
+          (replace-match (concat (match-string 1) (downcase (match-string 2)))
+                         t nil)))))
+
+  (defun haskell-data-remove-leading-comma-space (start end)
+    "Convert `({|,) fooBar` into `({|,}) bar` given prefix `foo`"
+    (interactive "r")
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char 1)
+      (let ((case-fold-search nil))
+        (while (search-forward-regexp "\\(, \\)" nil t)
+          (replace-match "" t nil)))))
+
+
+  (defun haskell-data-remove-type-colons (start end)
+    "remove all ` :: `"
+    (interactive "r")
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char 1)
+      (let ((case-fold-search nil))
+        (while (search-forward-regexp "\\( :: \\)" nil t)
+          (replace-match " " t nil)))))
+
+  (defun haskell-data-remove-id-id (start end)
+    "remove all ` id id  ` lines when converting orville to persistent"
+    (interactive "r")
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char 1)
+      (let ((case-fold-search nil))
+        (while (search-forward-regexp "id id" nil t)
+          (beginning-of-line)
+          (kill-line)
+          (kill-line)
+          ))))
+
+  (defun haskell-data-remove-comments (start end)
+    "remove all comment lines"
+    (interactive "r")
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char 1)
+      (let ((case-fold-search nil))
+        (while (search-forward-regexp " -- " nil t)
+          (beginning-of-line)
+          (kill-line)
+          (kill-line)
+          ))))
+
+  (defun haskell-data-replace-time-type-param-utctime (start end)
+    "remove all ` :: `"
+    (interactive "r")
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char 1)
+      (let ((case-fold-search nil))
+        (while (search-forward-regexp " \\(time\\)" nil t)
+          (replace-match " UTCTime" t nil)))))
+
+  (defun remove-prefix-in-region (prefix)
+    (replace-regexp prefix "" nil (region-beginning) (region-end))
+    )
+  ;; (remove-prefix "testIt")
+  ;; testIt1 testIt2 testIt3
+  (defun convert-to-persistent-qq ()
+    (interactive)
+    (message "convert-to-persistent-qq")
+    (insert "Persist.share [Persist.mkPersist Persist.sqlSettings, Persist.mkMigrate \"migrateAll\"] [Persist.persistLowerCase|
+                  ")
+    (kill-word nil)
+    (delete-char 1)
+    (forward-word)
+    (kill-word nil)
+    (kill-word nil)
+
+    (kill-line nil)
+    (set-mark-command nil)
+    (backward-word)
+    (kill-ring-save (mark) (point))
+    (delete-backward-char 16)
+    (forward-word)
+    (mark-paragraph)
+    (let ((fieldPrefix (s-lower-camel-case (car kill-ring))))
+      (haskell-data-remove-field-prefix fieldPrefix (region-beginning) (region-end))
+      )
+    (mark-paragraph)
+    (next-line)
+    (next-line)
+    (haskell-data-remove-leading-comma-space (region-beginning) (region-end))
+    (search-forward-regexp "}")
+    (delete-backward-char 2)
+    (insert "|]")
+    (search-backward-regexp "{")
+    (delete-char 2)
+    (mark-paragraph)
+    (haskell-data-remove-type-colons (region-beginning) (region-end))
+    (mark-paragraph)
+    (haskell-data-remove-id-id (region-beginning) (region-end))
+    (mark-paragraph)
+    (haskell-data-replace-time-type-param-utctime (region-beginning) (region-end))
+    (mark-paragraph)
+    (haskell-data-remove-comments (region-beginning) (region-end))
+    (search-forward-regexp "|]")
+    (next-line)
+    ;; (mark-paragraph)
+    ;; (haskell-data-switch-maybe-order-to-persistent-qq)
+    )
+#+end_src
+
+#+name: KGpjAobMQueQo9ewty8Xrn
+#+begin_src emacs-lisp
+    (add-to-list 'org-file-apps '("\\.flac\\'" . "cvlc --play-and-exit %s"))
+#+end_src
+
+
+** install emacs
+
+#+begin_src nix :noweb-ref emacs-system-dep :tangle no
+emacsGcc
+#+end_src
+
+
+** make reloading my configuration easy
+
+*** rebuild
+#+name: Q6r6uUnVtfhsrRwa2Cb9rA
+#+begin_src emacs-lisp
+    (defun rebuild-nix-configuration ()
+  (interactive)
+      (async-shell-command "cd ~/devos2/ && nix-shell --run \"flk tower switch\"")
+     )
+#+end_src
+
+*** update
+#+name: Q6r6uUnVtfhsrRwa2Cb9rA
+#+begin_src emacs-lisp
+  (defun update-and-rebuild-nix-configuration ()
+  (interactive)
+      (async-shell-command "cd ~/devos2/ && nix-shell --run \"flk update\" && nix-shell --run \"flk tower switch\"")
+     )
+#+end_src
+
+
+** enable and configure exwm
+
+*** install package
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+exwm
+exwm-edit
+#+end_src
+
+
+*** config
+
+**** exwm
+   #+begin_src emacs-lisp :tangle no
+     (use-package exwm
+       :init
+       (setq exwm-input-global-keys
+             `(([?\s-r] . exwm-reset)
+               ([?\s-i] . exwm-input-release-keyboard)
+               ;; convenience keybinding, meant to mimic `esc' in Vim bindings
+               ([?\s-\ ] . app-launcher-run-app)
+               ([?\s-n ] . next-buffer)
+               ([?\s-p ] . previous-buffer)
+               ([?\s-b ] . consult-buffer)
+               ([?\s-\[] . exwm-reset)))
+       (defun exwm-rename-buffer ()
+         (interactive)
+         (exwm-workspace-rename-buffer
+          (concat exwm-class-name ": "
+                  (if (<= (length exwm-title) 150) exwm-title
+                    (concat (substring exwm-title 0 149) "...")))))
+
+       ;; Add these hooks in a suitable place (e.g., as done in exwm-config-default)
+       (add-hook 'exwm-update-class-hook 'exwm-rename-buffer)
+       (add-hook 'exwm-update-title-hook 'exwm-rename-buffer)
+       :config
+       (require 'exwm)
+
+       ;; TODO fix this
+       ;; (require 'exwm-systemtray)
+       ;; (exwm-systemtray-enable)
+       (exwm-enable)
+       ;; stop exwm from catching SPC leader key.
+       ;; the double whitespace is intentional
+       ;; credit https://github.com/matthuszagh/emacs/blob/5827a8d2ca4e97bf37cfa71dabf9346043573798/layers/exwm-layer.el#L112
+       )
+
+     (use-package exwm-edit
+       :config
+       ;; TODO do I have an equivalent of this?
+       (defun ag-exwm/on-exwm-edit-compose ()
+         ;; (spacemacs/toggle-visual-line-navigation-on)
+         (funcall 'markdown-mode))
+       (add-hook 'exwm-edit-compose-hook 'ag-exwm/on-exwm-edit-compose))
+   #+end_src
+
+
+** TODO start emacs server
+
+   #+name: 2ewEsgpwsyYxmLCbaLjZxn
+   #+begin_src emacs-lisp
+   (unless (server-running-p) (server-start))
+   #+end_src
+
+
+** Better emacs defaults
+
+#+BEGIN_SRC emacs-lisp :noweb yes
+<<better-defaults>>
+#+END_SRC
+
+*** list
+    :PROPERTIES:
+    :header-args: :noweb-ref better-defaults :tangle no
+    :END:
+**** =y= not =yes=
+    #+begin_src emacs-lisp
+     (defalias 'yes-or-no-p 'y-or-n-p)
+    #+end_src
+
+
+**** don't litter lock files or autosave files
+     #+begin_src emacs-lisp
+       (setq backup-directory-alist `(("." . ,(expand-file-name "tmp/backups/" user-emacs-directory))))
+       (make-directory (expand-file-name "tmp/auto-saves/" user-emacs-directory) t)
+       (setq auto-save-list-file-prefix (expand-file-name "tmp/auto-saves/sessions/" user-emacs-directory)
+	     auto-save-file-name-transforms `((".*" ,(expand-file-name "tmp/auto-saves/" user-emacs-directory) t)))
+       ;; not recommended, but you may end up wanting to disable lock files that look like this:
+       ;; ex. .#Emacs.org
+       ;; (setq create-lockfiles nil)
+
+       ;; I bet these need to be in the use-package declarations for these libs
+       (setq projectile-known-projects-file (expand-file-name "tmp/projectile-bookmarks.eld" user-emacs-directory)
+	     lsp-session-file (expand-file-name "tmp/.lsp-session-v1" user-emacs-directory))
+
+       ;; or you might just want to use the no-littering package
+       ;; https://github.com/daviwil/emacs-from-scratch/blob/master/show-notes/Emacs-Tips-Cleaning.org#no-littering
+
+     #+end_src
+
+
+**** remove initial scratch buffer message
+    #+begin_src emacs-lisp
+     (setq initial-scratch-message nil)
+    #+end_src
+
+
+**** set initial mode to org mode (includes scratch buffer)
+    #+begin_src emacs-lisp
+     (setq initial-major-mode 'org-mode)
+    #+end_src
+
+
+**** disable startup screen
+  #+BEGIN_SRC emacs-lisp :tangle no :noweb-ref early-init
+    (setq inhibit-startup-screen t
+	  inhibit-startup-echo-area-message t)
+  #+end_src
+
+
+**** layout redo/undo with winner mode                      :superpower:
+
+***** use-package
+
+     #+begin_src emacs-lisp
+       (use-package winner
+         :config
+         (setq winner-ring-size 1000) ;; TODO literate
+         (winner-mode 1)
+         :bind (("C-c w u" . 'winner-undo)
+                ("C-c w r" . 'winner-redo)
+                )
+         )
+     #+end_src
+
+
+**** Window split size should be proportional
+
+***** Example
+ This one was a little tough to figure out, but [[https://emacs.stackexchange.com/a/29011][this stackoverflow answer]] explained things.
+
+ - Make your current window the only window
+ - Split it horizontally with =C-x 2=
+ - Split it horizontally again with =C-x 2=
+
+ Should the 3 vertical windows each take up 1/3 of the screen or should the bottom-most window take up 1/2 of the screen and the top 1/2 be split into 1/4's?
+
+ I think it's nicer to have each be 1/3, or proportional.
+***** make it so
+ #+begin_src emacs-lisp
+ (setq window-combination-resize t)
+ #+end_src
+
+
+**** Shorten names of buffers in mode line
+***** reasoning
+ Since I use exwm I can sometimes have very long buffer names like:
+
+ #+begin_example
+  Firefox: emacs-config/config.org at master * tecosaur/emacs-config — Mozilla Firefox
+ #+end_example
+
+ As a first pass I'll naievely cut this to 40 characters making it:
+
+ #+begin_example
+  Firefox: emacs-config/config.org at mast
+ #+end_example
+
+ But it'd be nice to say "up to 40 characters but cut off at =*= or last space before 40".
+***** make it so
+ #+begin_src emacs-lisp
+ (setq-default mode-line-buffer-identification (list -40 (propertized-buffer-identification "%12b")))
+ #+end_src
+
+
+**** turn on auto-revert mode so files are refreshed, but be quiet
+
+ #+begin_src emacs-lisp
+     (global-auto-revert-mode)
+     ;; Also auto refresh dired, but be quiet about it
+     (setq global-auto-revert-non-file-buffers t)
+     (setq auto-revert-verbose nil)
+ #+end_src
+
+
+**** A better default for word-wrapping
+
+     #+name: Mwu2AdMNRnmhbALAw3qva7
+     #+begin_src emacs-lisp
+     (setq-default word-wrap t)
+     #+end_src
+
+
+*** Preserve all history in emacs
+
+#+begin_src emacs-lisp
+  (use-package savehist
+    :hook (after-init . savehist-mode)
+    :init
+    (setq savehist-file (concat user-emacs-directory ".cache/savehist"))
+    :config
+    (setq history-length 10000
+	  history-delete-duplicates t
+	  savehist-save-minibuffer-history t
+	  savehist-autosave-interval 60)
+
+    (add-to-list 'savehist-additional-variables 'kill-ring)
+    (add-to-list 'savehist-additional-variables 'search-ring)
+    (add-to-list 'savehist-additional-variables 'regexp-search-ring)
+    (add-to-list 'savehist-additional-variables 'last-kbd-macro)
+    (add-to-list 'savehist-additional-variables 'kmacro-ring)
+    (add-to-list 'savehist-additional-variables 'shell-command-history)
+    (add-to-list 'savehist-additional-variables 'Info-history-list)
+    (add-to-list 'savehist-additional-variables 'register-alist)
+    (add-to-list 'savehist-additional-variables 'compilation-command)
+    (add-to-list 'savehist-additional-variables 'kmacro-ring)
+    )
+#+end_src
+
+
+*** recentf
+
+#+begin_src emacs-lisp :noweb yes
+(use-package recentf
+  :config
+  (recentf-mode)
+  (setq  recentf-max-saved-items 1000
+         recentf-exclude '("^/var/folders\\.*"
+                          "COMMIT_EDITMSG\\'"
+                          ".*-autoloads\\.el\\'"
+                          "[/\\]\\.elpa/")))
+    #+end_src
+
+
+*** Prefer splitting windows vertically
+
+#+begin_src emacs-lisp
+  (setq split-width-threshold 160
+        split-height-threshold 80)
+#+end_src
+
+*** give shrink window a binding so we can call it from talon
+
+#+begin_src emacs-lisp :tangle no :noweb-ref emacs-config
+  (defun my/shrink-window ()
+    (interactive)
+    (enlarge-window -4)) ;; not sure why (enlarge-window -4) == (enlarge-window 20) and reverses it lol
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref emacs-binds
+  ("C-c w s" . 'my/shrink-window)
+#+end_src
+
+*** Convenient bindings for next/prev error
+
+#+begin_src emacs-lisp :tangle no :noweb-ref emacs-binds
+  ("M-n" . 'next-error)
+  ("M-p" . 'previous-error)
+#+end_src
+
+*** reload TAGS without querying
+
+#+name: XjyEDjBRgWhXBaui277qpp
+#+begin_src emacs-lisp :tangle no :noweb-ref emacs-config
+(setq tags-revert-without-query t)
+#+end_src
+
+*** kill current buffer function
+
+#+begin_src emacs-lisp :tangle no :noweb-ref emacs-binds
+  ("C-c b d" . spacemacs/kill-this-buffer)
+#+end_src
+
+#+name: FcFDTxywVxvbWdHUFttxFi
+#+begin_src emacs-lisp :tangle no :noweb-ref emacs-config
+  ;; our own implementation of kill-this-buffer from menu-bar.el
+  (defun spacemacs/kill-this-buffer (&optional arg)
+    "Kill the current buffer.
+            If the universal prefix argument is used then kill also the window."
+    (interactive "P")
+    (if (window-minibuffer-p)
+        (abort-recursive-edit)
+      (if (equal '(4) arg)
+          (kill-buffer-and-window)
+        (kill-buffer))))
+#+end_src
+
+*** use-package
+
+#+begin_src emacs-lisp :noweb yes
+  (use-package emacs
+    :config
+  	         <<emacs-config>>
+    :bind (
+           <<emacs-binds>>
+           ))
+#+end_src
+
+
+** Better ediff defaults
+*** config
+  :PROPERTIES:
+  :header-args: :noweb-ref use-package-ediff-config :tangle no
+  :END:
+**** Don't open another frame!
+#+begin_src emacs-lisp
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+#+end_src
+
+*** use-package
+#+begin_src emacs-lisp :noweb yes
+  (use-package ediff
+    :config
+    <<use-package-ediff-config>>
+    )
+#+end_src
+
+
+** Make emacs usable for speech to text
+*** motivation and methodology
+
+**** I had some RSI, so I'll be using Talon voice to control emacs
+
+**** one popular approach seems to be disambiguating by prefixing commands
+
+**** I want to talk less though, so I'll take treat modes as different applications from talons point of view
+
+*** put major mode in frame title to allow talon configuration per mode
+
+#+begin_src emacs-lisp
+(setq frame-title-format '("%b" "      " "[" (:eval (format "%s" major-mode)) "]"))
+#+end_src
+
+
+** yasnippet
+
+*** use-package
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+  yasnippet
+#+end_src
+
+#+begin_src emacs-lisp :noweb yes
+  (use-package yasnippet :config (yas-global-mode 1))
+#+end_src
+
+
+** TODO github code reviews in emacs                            :superpower:
+
+*** TODO use-package
+#+begin_src nix :noweb-ref emacs-package-in-let :tangle no
+  github-review = emacsPackages.trivialBuild {
+    pname = "github-review";
+    packageRequires = [ emacsPackages.forge emacsPackages.a emacsPackages.ghub emacsPackages.s  emacsPackages.dash emacsPackages.deferred ];
+    src = prev.fetchurl {
+      url = "https://raw.githubusercontent.com/charignon/github-review/341b7a1352e4ee1f1119756360ac0714abbaf460/github-review.el";
+      sha256 = "sha256-c7MtT4U28pxLgB0ga+s1rDOA8PJgX3vX8CUrAHcqFUw=";
+    };
+  };
+#+end_src
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+github-review
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package github-review)
+#+end_src
+
+*** TODO get listing with forge
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+forge
+#+end_src
+
+
+#+begin_src emacs-lisp
+  (use-package forge
+    :after magit
+    :config
+  )
+#+end_src
+
+*** TODO get fast incremental notifications with gh-notify
+
+https://github.com/anticomputer/gh-notify
+
+When I added this I got some nix cache erros... not sure if I did something wrong or those were just transient
+
+#+begin_src nix :noweb-ref emacs-package-in-let :tangle no
+  gh-notify = emacsPackages.trivialBuild {
+    pname = "gh-notify";
+    packageRequires = [ emacsPackages.magit emacsPackages.forge ];
+    src = prev.fetchurl {
+      url = "https://raw.githubusercontent.com/anticomputer/gh-notify/3e2f7b8e4804e1edb1b2464cea671cedbbd95424/gh-notify.el";
+      sha256 = "03ikgzc67n5jkrf231zdnrc58kpv5ibdh36phzha9fw8nm0yasl4";
+    };
+  };
+#+end_src
+
+
+#+begin_src nix :noweb-ref disabled-emacs-package :tangle no
+gh-notify
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package gh-notify)
+  #+end_src
+
+
+
+** TODO stack overflow in emacs
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+sx
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package sx)
+  #+end_src
+
+** everything org mode
+*** make things nicer
+
+**** ret should follow links by default
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-config
+(setq org-return-follows-link t)
+#+end_src
+
+**** images should display by default
+#+begin_src emacs-lisp :tangle no :noweb-ref org-config
+(setq org-startup-with-inline-images t)
+#+end_src
+
+**** download and display remote images by default
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-config
+(setq org-display-remote-inline-images 'download)
+#+end_src
+
+**** resize images to attr_html value
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-config
+(setq org-image-actual-width nil)
+#+end_src
+
+*** basic setup
+
+**** org-directory
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda-init
+  (setq org-directory "~/gtd-rouge")
+#+end_src
+
+**** org todo keywords
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda-init
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "MYBE(m)" "WAIT(w)" "|"
+                    "DONE(d)" "KILL(k)" "STUCK(s)")))
+#+end_src
+
+**** org agenda files
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-agenda-init
+  (setq org-agenda-files (list "~/gtd-rouge/")) ;; doesn't seem to use org-directory and work with relative file paths :/
+#+end_src
+
+**** Setup capture 
+***** binding to make capturing low friction
+#+begin_src emacs-lisp :noweb-ref org-capture-keybinds :tangle no
+("C-c o c" . 'org-capture)
+#+end_src
+***** make capturing direclty to inbox low friction
+
+#+begin_src emacs-lisp :noweb-ref org-capture-keybinds :tangle no
+("C-c o i" . 'codygman/org-gtd-capture-inbox)
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-capture-config
+  (defun codygman/org-gtd-capture-inbox ()
+    (interactive)
+    (org-capture nil "i"))
+(defun codygman/org-agenda-all-todos ()
+    (interactive)
+    (org-agenda nil "t"))
+#+end_src
+
+***** capture to inbox
+#+begin_src emacs-lisp :noweb-ref org-capture-config :tangle no
+  (add-to-list 'org-capture-templates
+                   '("i"
+                     "Inbox"
+                     entry (file "~/gtd-rouge/inbox.org")
+                     "* TODO %?\n%U\n\n  %i\n  %a"
+                     :kill-buffer t))
+#+end_src
+
+*** make org mode nicer to use
+
+**** =RET= should follow links
+
+#+begin_src emacs-lisp :tangle no :noweb-ref org-config
+(setq org-return-follows-link t)
+#+end_src
+
+*** make literate configuration easier
+
+**** elisp blocks using code snippets
+
+     I might want to inline these, but right now this is at [[file:snippets/org-mode/elisp]]
+
+     
+*** org agenda setup
+
+**** use org-super-agenda
+
+***** resource
+ https://git.sr.ht/~codygman/emacs-config/tree/master/item/emacs-config.org#L2698
+
+***** add package
+ #+begin_src nix :noweb-ref emacs-package :tangle no
+ org-super-agenda
+ #+end_src
+
+ #+begin_src emacs-lisp
+   (use-package org-super-agenda
+     :hook ((org-agenda-mode . org-super-agenda-mode) )
+     :config
+     (org-super-agenda-mode)
+     ;; TODO day mode by default?
+     (setq org-super-agenda-header-map nil
+           org-super-agenda-groups
+           '(
+             (:file-path "conflict" :name "Conflicts")
+
+             (:log t)  ; Automatically named "Log"
+
+             (:name "Agenda"
+                    :discard (:tag ("habit"))
+                    :time-grid t)
+
+             (:name "Next to do"
+                    :todo "NEXT"
+                    :order 1)
+
+             (:name "Today"
+                    :scheduled today)
+
+             (:name "Due today"
+                    :deadline today)
+
+             (:name "Overdue"
+                    :deadline past)
+
+             (:name "Due soon"
+                    :deadline future)
+
+             (:name "Past due Scheduled"
+                    :scheduled past)))
+     ;; (setq org-super-agenda-header-map (make-sparse-keymap)) ;; this fixes binding but messes up origami :'(
+
+     )
+ #+end_src
+
+***** add origami-mode (should this be top level???) for folding agenda stuff
+#+begin_src nix :noweb-ref emacs-package :tangle no
+origami
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package origami
+    :bind (:map origami-mode-map
+                ;; C-c f n forward node same level
+                ;; C-c f p previous
+                ;; C-c f o toggle recursive
+              ("C-c f o" . origami-toggle-node))
+    :config
+
+    (defvar ap/org-super-agenda-auto-show-groups
+      '("Agenda" "Overdue" "Logged" "Today"))
+
+    (defun my/org-get-elem-at-point-content-string ()
+      (let ((elem (org-element-at-point)))
+        (buffer-substring-no-properties
+         (org-element-property :contents-begin elem)
+         (org-element-property :contents-end elem))))
+
+    ;;; TODO something about this breaks agenda go to date
+    (defun ap/org-super-agenda-origami-fold-default ()
+      "Fold certain groups by default in Org Super Agenda buffer."
+      ;; TODO really don't like doing this
+      ;; basically this function running on finalize runs too soon I think
+      ;; and it errors when I mark todo
+      (ignore-errors
+      (forward-line 2)
+
+      (cl-loop do (origami-forward-toggle-node (current-buffer) (point))
+               while (numberp (org-agenda-forward-block)))
+
+      (--each ap/org-super-agenda-auto-show-groups
+        (goto-char (point-min))
+
+        ;; change while to when if you only want first expanded
+        (while (re-search-forward (rx-to-string `(seq bol " " ,it eol)) nil t)
+          (origami-show-node (current-buffer) (point))))
+
+      (org-agenda-goto-today)
+      ))
+
+    :hook ((org-agenda-mode . origami-mode)
+           (org-agenda-finalize . ap/org-super-agenda-origami-fold-default)))
+#+end_src
+
+*** org keybindings
+
+**** org heading (not needed, its =C-enter=)
+
+**** org subheading
+
+#+name: dLUnLrvk6tBGHouwbJ6raa
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybinds
+("C-c o h i s" . 'org-insert-subheading)
+#+end_src
+
+**** org heading not respecting content
+
+this turns out us for awhile in the middle of dividing a big chunk of code pasted in
+
+#+name: dLUnLrvk6tBGHouwbJ6raa
+#+begin_src emacs-lisp :tangle no :noweb-ref org-keybinds
+("C-c o h i H" . 'org-insert-heading) ;; TODO nest this under C-c c o i H
+#+end_src
+
+*** use-package stanza for various org things
+
+#+begin_src emacs-lisp :noweb yes
+  (defun dw/org-mode-setup ()
+    (org-indent-mode)
+    (variable-pitch-mode 1)
+    (auto-fill-mode 0)
+    (visual-line-mode 1))
+  (use-package org
+    :hook (org-mode . dw/org-mode-setup)
+    :bind
+     (
+    <<org-keybinds>>
+      )
+    :config
+    <<org-config>>
+    (setq
+     <<org-config-setq>>
+     ))
+#+end_src
+
+    #+begin_src emacs-lisp :noweb yes
+      (use-package org-capture
+        :init
+        <<org-capture-init>>
+        :config
+        (lambda () ) ;; this is here just in case org-mode-config noweb-ref is empty
+        <<org-capture-config>>
+     :bind
+   (
+    <<org-capture-keybinds>>
+    )
+        )
+    #+end_src
+
+    #+begin_src emacs-lisp :noweb yes
+            (use-package org-agenda
+              :init
+              <<org-agenda-init>>
+              :config
+              <<org-agenda-config>>
+              ;; use as-is if you don't have an existing org-agenda setup
+              ;; otherwise push the directory to the existing list
+              (setq org-agenda-start-with-log-mode t)
+      )
+
+    #+end_src
+
+    #+begin_src emacs-lisp :noweb yes
+      (use-package org-habit
+        ;; :init
+        ;; <<org-habit-init>>
+        :config
+        ;; (lambda () ) ;; this is here just in case org-mode-config noweb-ref is empty
+
+        <<org-habit-config>>
+        )
+    #+end_src
+
+
+** gpg
+
+The existence of headings with just a use-package stanza in them suggests maybe the top-level "use-package stanzas" could be useful.
+
+*** use-package
+
+    #+begin_src emacs-lisp :noweb yes
+      (use-package epa
+	:init
+	(lambda () ) ;; this is here just in case noweb-ref is empty
+	:config
+	(lambda () ) ;; this is here just in case noweb-ref is empty
+
+	<<epa-config>>)
+      (use-package epa-file
+	:init
+	(lambda () ) ;; this is here just in case noweb-ref is empty
+
+	<<epa-init>>
+	:config
+	(lambda () ) ;; this is here just in case noweb-ref is empty
+
+	<<epa-file-config>>
+       )
+    #+end_src
+
+
+** a gpg encrypted private journal
+
+*** add org capture template
+
+#+begin_src emacs-lisp :noweb-ref org-capture-config :tangle no
+  (add-to-list 'org-capture-templates
+               '("j" "Journal" entry
+                 (file+datetree "~/org/journal.org.gpg") "* %?\nEntered on %U\n  %i\n  %a"))
+#+end_src
+
+
+*** fullscreen for journal entry and org-capture in general
+#+begin_src emacs-lisp :noweb-ref org-capture-config :tangle no
+(add-hook 'org-capture-mode-hook 'delete-other-windows)
+#+end_src
+
+
+*** define function to call capture template programatically
+
+#+begin_src emacs-lisp :noweb-ref org-capture-init :tangle no
+  (defun codygman/org-go-to-journal ()
+    (interactive)
+    (org-capture nil "j"))
+#+end_src
+
+
+*** add keybinding that calls that function
+
+#+begin_src emacs-lisp :noweb-ref org-capture-keybinds :tangle no
+("C-c o j" . 'codygman/org-go-to-journal)
+#+end_src
+
+
+*** default to my gpg key and don't prompt
+
+#+begin_src emacs-lisp :noweb-ref epa-config :tangle no
+(setq epa-pinentry-mode 'loopback)
+#+end_src
+
+#+begin_src emacs-lisp :noweb-ref epa-file-config :tangle no
+(setq epa-file-encrypt-to '("cody@codygman.dev"))
+(setq epa-file-select-keys nil)
+#+end_src
+
+
+*** close all gpg buffers after 1 minute of idle time
+
+
+** TODO improve narrowing
+
+*** Core framework Selectrum
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+selectrum
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package selectrum
+    :config
+    (setq selectrum-refine-candidates-function #'orderless-filter)
+    ;; https://github.com/minad/consult/issues/282#issuecomment-824656398
+    (setq selectrum-highlight-candidates-function #'orderless-highlight-matches)
+    ;; I think this shouldn't be necessary because of
+    ;; https://github.com/raxod502/selectrum/commit/a09ecdea6609fe69144c44959dd016b32d14bf03
+    ;; I'll leave it for now though since it not working is very annoying
+    ;; TODO fix vertical window height shouldn't be necessary with a new enough selectrum or after switching to vertico
+    (setq selectrum-fix-vertical-window-height t)
+    (selectrum-mode +1)
+    )
+#+end_src
+
+
+*** Orderless
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+orderless
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package orderless
+      :init
+      (setq completion-category-defaults nil
+            completion-category-overrides '((file (styles . (partial-completion)))))
+      :config
+      (setq orderless-skip-highlighting (lambda () selectrum-is-active))
+      (setq selectrum-highlight-candidates-function #'orderless-highlight-matches)
+      :custom (completion-styles '(orderless)))
+#+end_src
+
+*** Consult (ivy equivalent)
+
+**** two options for consult previews on exwm
+
+***** disable consult previews because of exwm interaction (always works)
+
+let's try avoiding this for now and see if it works
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-config
+  (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key nil)
+#+end_src
+
+
+***** try working around (should work, but sometimes doesn't at least with evil)
+
+#+begin_src emacs-lisp :tangle no :noweb-ref disabled-consult-config
+     (defun consult-buffer-state-no-x ()
+       "Buffer state function that doesn't preview X buffers."
+       (let ((orig-state (consult--buffer-state))
+               (filter (lambda (cand restore)
+                         (if (or restore
+                                 (let ((buffer (get-buffer cand)))
+                                   (and buffer
+                                        (not (eq 'exwm-mode (buffer-local-value 'major-mode buffer))))))
+                             cand
+                           nil))))
+           (lambda (cand restore)
+             (funcall orig-state (funcall filter cand restore) restore))))
+
+     (setq consult--source-buffer
+             (plist-put consult--source-buffer :state #'consult-buffer-state-no-x))
+#+end_src
+
+
+**** =C-c c l= consult-line
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-keybinds
+("C-c c l" . 'consult-line)
+#+end_src
+
+**** =C-c c b= consult-buffer
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-keybinds
+  ("C-c c b" . 'consult-buffer)
+  ("s-b" . 'consult-buffer)
+#+end_src
+
+**** =C-c c L= consult-line at point
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-keybinds
+("C-c c L" . 'consult-line-symbol-at-point)
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-config
+(defun consult-line-symbol-at-point ()
+  (interactive)
+  (consult-line (thing-at-point 'symbol)))
+#+end_src
+
+
+**** =C-c c m= consult-mark
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-keybinds
+("C-c c m" . 'consult-mark)
+#+end_src
+
+
+**** =C-c c y= consult-yank
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-keybinds
+("C-c c y" . 'consult-yank)
+("M-y" . 'consult-yank)
+#+end_src
+
+**** =C-c c i= consult-imenu
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-keybinds
+("C-c c i" . 'consult-imenu)
+#+end_src
+
+**** find symbol in project
+#+begin_src emacs-lisp :noweb-ref consult-keybinds :tangle no
+  ("C-c c s" . 'consult-ripgrep)
+  ("C-c c S" . 'consult-ripgrep-symbol-at-point)
+#+end_src
+
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-config
+(defun consult-ripgrep-symbol-at-point ()
+  (interactive)
+  (consult-ripgrep nil (thing-at-point 'symbol)))
+#+end_src
+
+
+**** smart find file (uses fd)
+
+#+begin_src emacs-lisp :noweb-ref consult-keybinds :tangle no
+  ("C-c c f" . 'consult-find-fd)
+  ("C-c c F" . 'consult-find-fd-all)
+#+end_src
+
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-config
+(defun consult-find-fd (&optional dir initial)
+  (interactive "P")
+  (let ((consult-find-command "fd --color=never --full-path ARG OPTS"))
+    (consult-find dir initial)))
+#+end_src
+
+TODO just make consult-find-fd more general?
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-config
+(defun consult-find-fd-all (&optional dir initial)
+  (interactive "P")
+  (let ((consult-find-command "fd -HI --color=never --full-path ARG OPTS"))
+    (consult-find dir initial)))
+#+end_src
+
+
+**** better help with consult
+
+***** apropos
+
+#+name: npYrzk3u5JaNTQimHKubbo
+#+begin_src emacs-lisp :tangle no :noweb-ref consult-keybinds
+  ("C-c c a" . 'consult-apropos)
+#+end_src
+
+
+**** use-package
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+projectile
+consult-flycheck
+consult
+
+#+end_src
+
+=NOTE= need to test that works fine on login when readme.el isn't present yet **IMPORTANT**
+
+The hook was failing for adding lexical-binding.
+
+#+begin_src emacs-lisp :noweb yes
+   (use-package consult
+   :init
+
+   ;; Configure register preview function.
+   ;; This gives a consistent display for both `consult-register' and
+   ;; the register preview when editing registers.
+   (setq register-preview-delay 0
+         register-preview-function #'consult-register-format)
+   :bind
+   (
+    <<consult-keybinds>>
+    )
+
+   <<consult-init>>
+
+   ;; Configure other variables and modes in the :config section, after lazily loading the package
+   :config
+   <<consult-config>>
+
+   (autoload 'projectile-project-root "projectile")
+   (setq consult-project-root-function #'projectile-project-root)
+   :custom-face
+   (consult-preview-cursor ((t (:inherit nil)))))
+
+   (use-package projectile) ;; TODO see if I can replace consult projectile dependencies with project.el
+
+   (use-package consult-flycheck
+     :bind (:map flycheck-command-map
+                 ("!" . consult-flycheck)))
+#+end_src
+
+
+*** marginalia
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+marginalia
+#+end_src
+
+For some reason Marginalia doesn't even load... not sure why. I bet it's because marginalia isn't actually on melpa yet so there isn't anything to override above.
+
+#+begin_src emacs-lisp
+;; Enable richer annotations using the Marginalia package
+(use-package marginalia
+  :bind (:map minibuffer-local-map
+              ("C-M-a" . marginalia-cycle)
+         ;; When using the Embark package, you can bind `marginalia-cycle' as an Embark action!
+         ;;:map embark-general-map
+         ;;     ("A" . marginalia-cycle)
+        )
+
+  ;; The :init configuration is always executed (Not lazy!)
+  :init
+  (require 'marginalia)
+
+  ;; Must be in the :init section of use-package such that the mode gets
+  ;; enabled right away. Note that this forces loading the package.
+  (marginalia-mode)
+
+  ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
+  (advice-add #'marginalia-cycle :after
+              (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit))))
+
+  ;; Prefer richer, more heavy, annotations over the lighter default variant.
+  ;; E.g. M-x will show the documentation string additional to the keybinding.
+  ;; By default only the keybinding is shown as annotation.
+  ;; Note that there is the command `marginalia-cycle' to
+  ;; switch between the annotators.
+  (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+)
+#+end_src
+
+
+** eshell as my main shell
+
+#+begin_src emacs-lisp :noweb yes
+  ;; (defun disable-company-mode ()
+  ;;   (company-mode 0))
+  (use-package eshell
+    ;; :after 'esh-autosuggest ;; TODO this isn't added back yet
+    :init
+    <<eshell-init>>
+    ;; TODO add this back when fish/esh-autosuggest are working
+    ;; :hook
+    ;; (add-hook (eshell-mode . disable-company-mode))
+    :config
+    <<eshell-config>>
+    (use-package em-term
+      :config
+      <<eshell-config-em-term>>
+    )
+  )
+#+end_src
+
+*** use a sane history value
+   By default it's 128 :S
+   #+begin_src emacs-lisp
+   (setq eshell-history-size 1000000)
+   #+end_src
+
+
+*** aliases
+  :PROPERTIES:
+  :header-args: :tangle eshell/alias :mkdirp true
+  :END:
+**** =gs=
+#+begin_src emacs-lisp
+alias gs (magit-status)
+#+end_src
+**** =ff=
+#+begin_src emacs-lisp
+alias ff find-file $1
+#+end_src
+**** =ffo=
+#+begin_src emacs-lisp
+alias ffo find-file-other-window $1
+#+end_src
+**** =...=
+#+begin_src emacs-lisp
+alias ... cd ../..
+#+end_src
+**** =-=
+#+begin_src emacs-lisp
+alias - cd -
+#+end_src
+**** =suspend=
+#+begin_src emacs-lisp
+alias suspend systemctl suspend
+#+end_src
+**** TODO =visual=
+    should call =eshell-exec-visual=, but might want to wait until [[*make =eshell-exec-visual= tramp aware][make =eshell-exec-visual= tramp aware]]
+
+*** visual (sub|commands) (run in term-mode)
+**** nmtui
+#+begin_src nix :noweb-ref eshell-config-em-term :tangle no
+(add-to-list 'eshell-visual-commands "nmtui")
+#+end_src
+**** alsamixer
+#+begin_src nix :noweb-ref eshell-config-em-term :tangle no
+(add-to-list 'eshell-visual-commands "alsamixer")
+#+end_src
+**** spt
+#+begin_src nix :noweb-ref eshell-config-em-term :tangle no
+(add-to-list 'eshell-visual-commands "spt")
+#+end_src
+**** htop (lol this is hilarious broken in shell mode if you do stuff like bring up kill prompt)
+#+begin_src nix :noweb-ref eshell-config-em-term :tangle no
+(add-to-list 'eshell-visual-commands "htop")
+#+end_src
+**** gotop (lol this is hilarious broken in shell mode)
+#+begin_src nix :noweb-ref eshell-config-em-term :tangle no
+(add-to-list 'eshell-visual-commands "gotop")
+#+end_src
+**** nix
+***** build
+#+begin_src nix :noweb-ref eshell-config-em-term :tangle no
+(add-to-list 'eshell-visual-subcommands '("nix" "build"))
+#+end_src
+**** docker
+***** push
+#+begin_src nix :noweb-ref eshell-config-em-term :tangle no
+(add-to-list 'eshell-visual-subcommands '("docker" "push"))
+#+end_src
+
+*** close visual commands when done
+   #+begin_src emacs-lisp
+   (setq eshell-destroy-buffer-when-process-dies t)
+   #+end_src
+
+*** TODO make =!!= work like it does in bash
+ex. sudo !! where !! fills in the last command
+
+*** cd into docker containers with tramp
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+docker-tramp
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package docker-tramp)
+  #+end_src
+
+
+
+*** TODO autocompletion for directory names without =cd=
+   Given being in directory /home/cody with:
+
+   #+begin_example
+   ls /home/cody
+   #+end_example
+
+   you get completions from =cd ba<tab>=
+
+   but not from =ba<tab>=
+
+   This is because by default autocompletions are for something else you want: program names
+
+   I want both though and then I'll disambiguate
+
+
+*** TODO list out "workspaces" to autosetup/go to from eshell
+
+*** TODO fish history suggestion
+
+currently broken:
+
+https://github.com/dieggsy/esh-autosuggest/issues/12
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+esh-autosuggest
+#+end_src
+
+TODO figure out how to disable other company mode things that might interfere here
+
+#+begin_src emacs-lisp :tangle no
+(use-package esh-autosuggest
+  :hook (eshell-mode . esh-autosuggest-mode)
+  :init
+  )
+#+end_src
+
+
+*** TODO fish autocompletion
+
+TODO this and company don't work well.
+
+TODO even if you disable company the suggestions don't have docs :/
+
+TODO unliterate
+
+#+begin_src nix :noweb-ref emacs-system-dep :tangle no
+fish
+#+end_src
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+  fish-completion
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package fish-completion
+  :when (executable-find "fish")
+  :config
+  (global-fish-completion-mode)
+  )
+#+end_src
+
+*** TODO make =eshell-exec-visual= tramp aware
+**** enables
+cd /ssh:cody@192.168.1.151:/home/cody/smurf
+/ssh:cody@192.168.1.151:/home/cody/smurf $ eshell-exec-visual "./develop.sh"
+**** here's an example that makes *only* ssh tramp-aware with eshell-exec-visual
+    #+begin_src emacs-lisp :tangle no
+      (defun eshell-exec-visual (&rest args)
+	"Run the specified PROGRAM in a terminal emulation buffer.
+      ARGS are passed to the program.  At the moment, no piping of input is
+      allowed."
+	(let* (eshell-interpreter-alist
+	       (original-args args)
+	       (interp (eshell-find-interpreter (car args) (cdr args)))
+	       (in-ssh-tramp (and (tramp-tramp-file-p default-directory)
+				  (equal (tramp-file-name-method
+					  (tramp-dissect-file-name default-directory))
+					 "ssh")))
+	       (program (if in-ssh-tramp
+			    "ssh"
+			  (car interp)))
+	       (args (if in-ssh-tramp
+			 (let ((dir-name (tramp-dissect-file-name default-directory)))
+			   (eshell-flatten-list
+			    (list
+			     "-t"
+			     (tramp-file-name-host dir-name)
+			     (format
+			      "export TERM=xterm-256color; cd %s; exec %s"
+			      (tramp-file-name-localname dir-name)
+			      (string-join
+			       (append
+				(list (tramp-file-name-localname (tramp-dissect-file-name (car interp))))
+				(cdr args))
+			       " ")))))
+		       (eshell-flatten-list
+			(eshell-stringify-list (append (cdr interp)
+						       (cdr args))))))
+	       (term-buf
+		(generate-new-buffer
+		 (concat "*"
+			 (if in-ssh-tramp
+			     (format "%s %s" default-directory (string-join original-args " "))
+			   (file-name-nondirectory program))
+			 "*")))
+	       (eshell-buf (current-buffer)))
+	  (save-current-buffer
+	    (switch-to-buffer term-buf)
+	    (term-mode)
+	    (set (make-local-variable 'term-term-name) eshell-term-name)
+	    (make-local-variable 'eshell-parent-buffer)
+	    (setq eshell-parent-buffer eshell-buf)
+	    (term-exec term-buf program program nil args)
+	    (let ((proc (get-buffer-process term-buf)))
+	      (if (and proc (eq 'run (process-status proc)))
+		  (set-process-sentinel proc 'eshell-term-sentinel)
+		(error "Failed to invoke visual command")))
+	    (term-char-mode)
+	    (if eshell-escape-control-x
+		(term-set-escape-char ?\C-x))))
+	nil)
+    #+end_src
+
+   https://gist.github.com/ralt/a36288cd748ce185b26237e6b85b27bb
+*** TODO make tramp faster
+**** TODO ssh controlmaster config (the big one)
+**** misc
+    #+begin_src emacs-lisp
+      ;; cache file-name forever
+      (setq remote-file-name-inhibit-cache nil)
+
+      ;; make sure vc stuff is not making tramp slower
+      (setq vc-ignore-dir-regexp
+	    (format "%s\\|%s"
+		    vc-ignore-dir-regexp
+		    tramp-file-name-regexp))
+
+      ;; not sure why we have this? just cargo-culting from an answer I saw
+      ;; online.
+      (setq tramp-verbose 1)
+
+      ;; projectile has the fun side-effect of wanting to calculate the
+      ;; project name, which makes tramp oh-so-much-slower.
+      (setq projectile-mode-line "Projectile")
+ #+end_src
+*** TODO detect bin directory of nix users
+
+   ~NOTE~: This needs put within a =use-package tramp= block
+
+    #+begin_src emacs-lisp :tangle no
+    (add-to-list 'tramp-remote-path "~/.nix-profile/bin")
+    #+end_src
+
+*** TODO make magit work smoothly over tramp
+   Right now it just hangs, probably because I'm not using [[*ssh controlmaster config (the big one)][ssh controlmaster config (the big one)]]
+
+   Though this also deserves consideration:
+
+   https://emacs.stackexchange.com/questions/33845/magit-with-tramp-is-slow
+
+
+** manage docker from emacs
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+docker
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package docker)
+  #+end_src
+
+** vterm as my fallback "real" terminal
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+vterm
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package vterm
+    :config
+    (setq vterm-max-scrollback 100000)
+  )
+#+end_src
+
+
+** completion with company
+
+#+begin_src nix :noweb-ref disable-emacs-package :tangle no
+company
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
+  (use-package company
+    :diminish t
+    :config
+    (setq company-minimum-prefix-length 1
+	  company-idle-delay 0.4
+	  company-selection-wrap-around t
+	  company-dabbrev-downcase nil
+	  )
+    )
+#+end_src
+
+
+** develop [[https://notes.andymatuschak.org/Evergreen_notes][Evergreen notes]] with org-roam
+*** TODO setup public tech org-roam
+**** tangle the .dir-locals.el that makes the magic happen
+#+begin_src emacs-lisp :tangle ~/tech-roam/.dir-locals.el :mkdirp t
+  ((nil . ((eval . (company-mode))
+	   (eval . (setq-local org-roam-directory (expand-file-name "~/tech-roam/")))
+	   (eval . (setq-local org-roam-db-location (expand-file-name "~/tech-roam/org-roam.db"))))))
+#+end_src
+*** TODO installation
+#+begin_src nix :noweb-ref emacs-package :tangle no
+org-roam
+#+end_src
+
+*** enable completions everywhere by default
+  #+begin_src emacs-lisp :noweb-ref org-roam-config :tangle no
+   (setq org-roam-completion-everywhere t)
+  #+end_src
+
+*** set org-roam-directory and db location explicitly to avoid =~= becoming roam
+#+begin_src emacs-lisp :noweb-ref org-roam-config :tangle no
+  (setq org-roam-directory "~/org-roam"
+        org-roam-db-location "~/org-roam/org-roam.db")
+#+end_src
+
+*** TODO it might be necessary to ensure that =company-capf= is at the very beginning
+*** TODO fix org roam-bug where it tries to run in emacs-daemon
+
+At least I think that's what is happening.... here is error:
+
+Error running timer ‘org-roam-db-update-cache-on-timer’: (file-error "Opening directory" "Permission denied" "/tmp/systemd-private-556d50cece394254a4c1261f4961e26d-accounts-daemon.service-8oY3Li")
+
+*** TODO local viewing with org-roam-server
+**** TODO below fix error about org.css not being included
+
+#+name: Jdia2asnHTbffASmNEFL8s
+#+begin_example
+Loading /nix/store/qcs6wpd883cjzphjj9ii00zx43rnjf66-emacs-packages-deps/share/emacs/site-lisp/org-roam-server.el (source)...
+progn: Opening input file: No such file or directory, /nix/store/qcs6wpd883cjzphjj9ii00zx43rnjf66-emacs-packages-deps/share/emacs/site-lisp/assets/org.css
+#+end_example
+
+**** add it
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+org-roam-server
+#+end_src
+
+
+**** configure it
+#+begin_src emacs-lisp :tangle no
+  (use-package org-roam-server
+    )
+#+end_src
+
+*** use-package
+  #+begin_src emacs-lisp :noweb yes
+    (use-package org-roam
+      :hook
+      (after-init . org-roam-mode)
+      :config
+      <<org-roam-config>>
+     )
+  #+end_src
+*** TODO export to html
+https://github.com/org-roam/org-roam/issues/156
+https://github.com/org-roam/org-roam-server
+
+
+** magit                                                          :exemplar:
+
+*** configure git nix module
+
+   First pass we'll just move the entire nix file inside of a nix source block.
+
+   Should it stay that way? should more be done to it? idk... think about it
+
+ #+BEGIN_SRC nix :tangle ../../../../users/profiles/git/default.nix :noweb yes :mkdirp yes
+{
+  programs.git = {
+    enable = true;
+    userName = "codygman";
+    userEmail = "cody@codygman.dev";
+    extraConfig = {
+      github = {
+        user = "codygman";
+      };
+    };
+    aliases = {
+      a = "add -p";
+      co = "checkout";
+      cob = "checkout -b";
+      f = "fetch -p";
+      c = "commit";
+      p = "push";
+      ba = "branch -a";
+      bd = "branch -d";
+      bD = "branch -D";
+      d = "diff";
+      dc = "diff --cached";
+      ds = "diff --staged";
+      r = "restore";
+      rs = "restore --staged";
+      st = "status -sb";
+
+      # reset
+      soft = "reset --soft";
+      hard = "reset --hard";
+      s1ft = "soft HEAD~1";
+      h1rd = "hard HEAD~1";
+
+      # logging
+      lg =
+        "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+      plog =
+        "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
+      tlog =
+        "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
+      rank = "shortlog -sn --no-merges";
+
+      # delete merged branches
+      bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
+    };
+  };
+}
+ #+end_src
+
+
+*** config
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+magit
+#+end_src
+
+#+begin_src emacs-lisp
+       (use-package magit
+     :bind (("C-c g f" . magit-find-file)
+            ("C-c g s" . magit-status)
+            ("C-c g F" . magit-find-file-other-window))
+
+     :init
+     ;; TODO write test for this
+     :config
+     (setq magit-section-initial-visibility-alist
+           '((stashes . hide)
+             (tag . hide)
+             (untracked . hide)
+             (unpulled . hide)
+             (unpushed . hide)
+             ))
+     )
+#+end_src
+
+
+*** TODO improved diffs with delta                              :impactful:
+
+#+begin_src nix :noweb-ref emacs-system-dep :tangle no
+delta
+#+end_src
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+magit-delta
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package magit-delta)
+#+end_src
+
+
+*** TODO browse current file in it's github repo
+
+
+*** TODO make magit start with everything collapsed               :impactful:
+
+
+** which-key for keybinding navigation
+
+*** use-package
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+which-key
+#+end_src
+
+#+begin_src emacs-lisp
+    (use-package which-key
+      :config
+  (setq which-key-idle-delay 0.5) 
+        (which-key-mode))
+#+end_src
+
+
+** file-system management with dired
+:PROPERTIES:
+:header-args: :tangle no :noweb yes
+:END:
+
+#+begin_src emacs-lisp :tangle yes :noweb yes
+  (use-package dired
+    :config
+    <<dired-config>>
+    )
+#+end_src
+
+*** dwim target other dired window by default
+
+#+begin_src emacs-lisp :noweb-ref dired-config
+(setq dired-dwim-target t)
+#+end_src
+
+
+*** TODO disable word wrap in dired mode
+it's so annoying and doesn't make sense lol
+
+
+*** TODO dired hide details mode by default
+     #+begin_src emacs-lisp :noweb-ref dired-config
+(add-hook 'dired-mode-hook
+      (lambda ()
+        (dired-hide-details-mode)))
+#+end_src
+
+
+** code completion
+
+I'm going to try out a very minimal setup for completion not centered around company mode
+
+#+begin_src emacs-lisp :tangle yes :noweb yes
+  (use-package dabbrev
+    :config
+    <<dabbrev-config>>
+    :bind (("M-/" . dabbrev-expand)
+	   ("s-/" . my/dabbrev-completion)))
+#+end_src
+
+*** more convenient keybindings
+
+#+begin_src emacs-lisp :noweb-ref dabbrev-config
+
+#+end_src
+
+*** don't let dabbrev change case
+
+#+begin_src emacs-lisp :noweb-ref dabbrev-config
+(setq dabbrev-case-replace nil)
+#+end_src
+
+*** make my dabbrev-completion function look in friend and other buffers by default
+
+#+name: FfQSNH5AutqYJ898dwTP7M
+#+begin_src emacs-lisp :noweb-ref dabbrev-config :tangle no
+  (defun my/dabbrev-completion ()
+    (interactive)
+    (let ((current-prefix-arg 4)) (call-interactively 'dabbrev-completion)))
+#+end_src
+
+
+*** match leading quotes and more
+
+#+name: 6wufLg6Fty5PgnkpG8Tsvc
+#+begin_src emacs-lisp
+ (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_")
+#+end_src
+
+*** let dabbrev match prefixed symbols
+
+#+name: 8gkgdNjmLxPHo4azuo9kjE
+#+begin_src emacs-lisp
+  (setq dabbrev-abbrev-skip-leading-regexp "[$*/=~']")
+#+end_src
+
+*** let dabbrev-complete look through other buffers for completion
+#+name: ntkRTdc58dNbJFZurxKKeV
+#+begin_src emacs-lisp
+  (defun my/dabbrev-friend-buffer (other-buffer)
+    (< (buffer-size other-buffer) (* 1024 1024)))
+
+  (setq dabbrev-friend-buffer-function #'my/dabbrev-friend-buffer)
+#+end_src
+
+** TODO Haskell integration
+
+*** haskell mode
+
+  #+begin_src nix :noweb-ref emacs-package :tangle no
+  haskell-mode
+  #+end_src
+
+  #+begin_src emacs-lisp :noweb yes
+    (use-package haskell-mode
+      :mode ("\\.hs\\'" . haskell-mode)
+      :init
+      (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+      (add-hook 'haskell-mode-hook 'haskell-indentation-mode)
+    (add-hook 'haskell-mode-hook 'apheleia-mode)
+      :config
+      (setq haskell-completing-read-function 'completing-read)
+      (setq haskell-process-show-debug-tips nil)
+      <<haskell-mode-config>>
+      )
+  #+end_src
+
+*** disable =at= error matching in compile mode that breaks things
+
+#+name: Dp5E9afxxPHo9mWC49cjZ7
+#+begin_src emacs-lisp :tangle no :noweb-ref disabled-haskell-mode-config
+  (setq haskell-compilation-error-regexp-alist
+        (seq-filter
+         (lambda (e) (not (s-contains? " at " (car e)))) haskell-compilation-error-regexp-alist)
+        )
+#+end_src
+
+
+*** TODO ghci repl
+
+**** TODO automatically open a ghci repl when emacs starts in ~
+
+
+**** TODO configure ghci to be convenient for common tasks
+
+***** TODO lenses
+
+***** TODO =text= and =bytestring= for actually opening the files
+
+***** TODO concise csv handling with lens-csv
+https://hackage.haskell.org/package/lens-csv
+
+***** TODO concise json parsing with lens-aeson
+
+***** TODO try lens-filesystem and maybe include
+
+***** TODO streaming with pipes, conduit, and maybe streamly
+
+
+**** TODO automatically load files from certiain modes into ghci and split below
+
+***** TODO automatically load json files when switched to and split ghci window below
+
+
+** tabs to manage workspaces
+
+   Future iterations of this could probably use persp-el to assign buffers to workspaces.
+
+   #+begin_src emacs-lisp
+     (use-package tab-bar
+
+       :custom-face
+       (tab-bar ((t (:background "#2c2c2c" :foreground "#ffffff" :height 0.5))))
+       :config
+       (setq tab-bar-close-button-show nil)
+       (setq tab-bar-close-last-tab-choice 'tab-bar-mode-disable)
+       (setq tab-bar-close-tab-select 'recent)
+       (setq tab-bar-new-tab-choice t)
+       (setq tab-bar-new-tab-to 'right)
+       (setq tab-bar-position nil)
+       (setq tab-bar-show t)
+       (setq tab-bar-tab-hints nil)
+       (setq tab-bar-tab-name-function 'tab-bar-tab-name-all) ;; 'tab-bar-tab-name-current) ;;
+
+       ;; (tab-bar-mode 1)
+       ;; (tab-bar-history-mode -1)
+       (require 'tab-bar)
+       ;; (tab-bar-mode 1)
+      :bind (("C-c t l" . 'tab-bar-select-tab-by-name)
+             ("C-c t r" . 'tab-bar-rename-tab)
+             ("C-c t t" . 'tab-bar-new-tab)
+             ("C-c t c" . 'tab-bar-close-tab)
+             ("C-c t n" . 'tab-bar-switch-to-next-tab)
+             ("C-c t p" . 'tab-bar-switch-to-prev-tab)
+             ("C-c t m" . 'tab-bar-move-tab)
+             )
+       )
+    #+end_src
+
+
+
+
+** compilation mode improvements
+
+*** don't truncate lines because it breaks compilation-minor-mode
+
+
+*** use-package
+
+#+begin_src emacs-lisp
+  (use-package compile
+    :config
+    (defun my-compilation-mode-hook ()
+      (setq truncate-lines nil) ;; automatically becomes buffer local
+      (set (make-local-variable 'truncate-partial-width-windows) nil))
+    :hook (compilation-mode . my-compilation-mode-hook))
+#+end_src
+
+
+** term mode improvements
+
+*** don't break compilation minor mode file links in term
+
+Some applications send hard newlines which breaks the regex and file navigation.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref term-mode-hook
+(setq-local term-suppress-hard-newline t)
+#+end_src
+
+*** don't word-wrap either
+
+Truthfully maybe I shouldn't set this to true by default, but for now we'll fix it here for term-mode.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref term-mode-hook
+(setq-local word-wrap nil)
+#+end_src
+
+
+*** use-package
+
+#+begin_src emacs-lisp :noweb yes
+    (use-package term
+      :config
+      (defun my-term-mode-hook ()
+        "Don't word wrap in term or allow hard newlines"
+        <<term-mode-hook>>
+        )
+      <<term-config>>
+      :hook (term-mode . my-term-mode-hook))
+#+end_src
+
+
+** lsp mode
+
+*** use-package
+
+ #+begin_src nix :noweb-ref emacs-package :tangle no
+  lsp-mode
+  lsp-haskell
+  lsp-ui
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (use-package lsp-mode
+        :hook (
+               (haskell-mode . lsp-deferred)
+               (lsp-mode . lsp-enable-which-key-integration)
+               ;; ((js2-mode rjsx-mode) . lsp)
+               )
+        :commands (lsp lsp-deferred)
+        :config
+        )
+
+      ;; TODO move
+      (use-package lsp-haskell
+        :init
+        (setq lsp-haskell-process-path-hie "haskell-language-server-wrapper")
+        (setq lsp-haskell-process-args-hie nil)
+        )
+
+
+      (use-package lsp-ui
+        :commands lsp-ui-mode
+        :config
+        ;; (setq lsp-ui-flycheck-live-reporting nil)
+        ;; (setq lsp-ui-sideline-enable nil)
+        ;; (setq lsp-ui-doc-enable nil)
+        ;; (setq lsp-ui-sideline-show-diagnostics nil)
+        (setq lsp-ui-sideline-enable t
+              ;; disable flycheck setup so default linter isn't trampled
+              lsp-ui-flycheck-enable nil
+              lsp-ui-sideline-show-symbol nil
+              lsp-ui-sideline-show-hover nil
+              lsp-ui-sideline-show-code-actions nil
+              lsp-ui-peek-enable nil
+              lsp-ui-imenu-enable nil
+              lsp-ui-doc-enable nil)
+        )
+
+    #+end_src
+
+
+
+** TODO executable code snippets with org-babel
+    #+begin_src emacs-lisp :noweb yes
+      (use-package ob
+	:init
+    <<org-babel-init>>
+	:config
+    <<org-babel-config>>
+	(org-babel-do-load-languages
+	 'org-babel-load-languages
+	 '(
+	   <<org-babel-languages>>
+	   )
+	 ))
+    #+end_src
+**** evaluate without confirmation
+#+begin_src emacs-lisp
+  (setq org-confirm-babel-evaluate nil)
+#+end_src
+**** languages
+  :PROPERTIES:
+  :header-args: :noweb-ref org-babel-languages :tangle no
+  :END:
+***** elisp
+    #+begin_src emacs-lisp
+    (emacs-lisp . t)
+    #+end_src
+***** sh
+    #+begin_src emacs-lisp
+    (shell . t)
+    #+end_src
+****** TODO run shellcheck on shell blocks live
+***** sql
+    #+begin_src emacs-lisp
+    (sql . t)
+    #+end_src
+***** haskell
+    #+begin_src emacs-lisp
+    (haskell . t)
+    #+end_src
+***** calc
+    #+begin_src emacs-lisp
+    (calc . t)
+    #+end_src
+
+**** TODO haskell
+  :PROPERTIES:
+  :header-args: :noweb-ref org-babel-init :tangle no
+  :END:
+***** TODO lsp org babel block integration
+***** make ob-haskell generate lists of tuples insetad of lists of lists
+****** reason: [[file:~/tech-roam/20210401224605-literate_programming_in_org_mode_with_haskell.org::*first problem, simple lists with mixed types don't work][first problem, simple lists with mixed types don't work]]
+****** make generate tuples of tuples
+
+#+begin_src emacs-lisp
+(defun my/org-babel-haskell-var-to-haskell (var)
+  "Convert an elisp value VAR into a haskell variable.
+The elisp VAR is converted to a string of haskell source code
+specifying a variable of the same value."
+  (if (listp var)
+      (concat "(" (mapconcat #'org-babel-haskell-var-to-haskell var ", ") ")")
+    (format "%S" var)))
+#+end_src
+
+#+begin_src emacs-lisp
+(advice-add 'org-babel-haskell-var-to-haskell :override
+            'my/org-babel-haskell-var-to-haskell)
+#+end_src
+
+
+****** make variable assignments of tuples of tuples replace outermost with braces
+
+#+begin_src emacs-lisp
+(defun my/replace-outer-parens-with-braces-if-nested (str)
+ (replace-regexp-in-string "))$" ")]" (replace-regexp-in-string "^((" "[(" str))
+)
+#+end_src
+
+#+begin_src emacs-lisp
+  (defun my/org-babel-variable-assignments:haskell (params)
+    "Return list of haskell statements assigning the block's variables."
+    (mapcar (lambda (pair)
+              (format "let %s = %s"
+                      (car pair)
+                      (replace-outer-parens-with-braces-if-nested (org-babel-haskell-var-to-haskell (cdr pair)))))
+            (org-babel--get-vars params)))
+#+end_src
+
+#+begin_src emacs-lisp
+(advice-add 'org-babel-variable-assignments :override
+            'my/org-babel-variable-assignments)
+#+end_src
+
+***** TODO [[file:~/tech-roam/20210401224605-literate_programming_in_org_mode_with_haskell.org::*Taking ob-haskell to the next level][Taking ob-haskell to the next level]]
+
+****** TODO get context menus of haskell result blocks with hyperbole
+
+
+***** TODO restclient
+
+
+
+*** TODO database access in emacs
+
+**** make sql blocks available
+#+begin_src emacs-lisp :noweb-ref org-babel-languages :tangle no
+  (sql . t)
+#+end_src
+
+**** using lsp mode
+***** much of this config is private in a personal.el/work.el file until I handle secrets in nix with agenix
+***** add sqls package to overlays so it's available
+
+****** slqs overlay
+
+#+BEGIN_SRC nix :tangle ../../../../overlays/sqls.nix :noweb no :mkdirp yes
+  final: prev: {
+    mysqls = prev.buildGoModule rec {
+      pname = "sqls";
+      version = "0.3.4";
+
+      src = prev.fetchFromGitHub {
+        owner = "lighttiger2505";
+        repo = "sqls";
+        rev = "5b32042675aade5f05df995ae5c7a53da6faa14c";
+        sha256 = "13837v27avdp2nls3vyy7ml12nj7rxragchwf92adn10ffp4aj6c";
+      };
+
+      vendorSha256 = "sha256-q5EwGVfFZUUWY3UTZcdicdDiyxqBrAj1TAQf0O/eNuc=";
+
+    };
+  }
+#+end_src
+****** go package deps not needed?
+
+****** TODO update those go package deps I was lazy about
+
+****** TODO post bugs about nil errors in sqls
+***** TODO disable lsp's breadcrumb functionality for sql mode
+It'll be way less jarring
+***** TODO highlight blocks tagged as prod in red
+This is a safety feature UI's like postico or dbeaver give you.
+
+Perhaps even turning on code block execution for sql queries in general or those tagged in prod would be good.
+***** TODO query validation using hasql-template?!?
+***** TODO investigate parse queries before sending and add a limit using hasql's query parser
+
+*** TODO transparent formatting for everything
+
+#+begin_src nix :noweb-ref disabled-emacs-package :tangle no
+apheleia-mode
+  #+end_src
+
+#+begin_src emacs-lisp :noweb yes
+  (use-package apheleia
+    :config
+
+    <<apheleia-config>>
+    )
+#+end_src
+
+**** run hlint followed by brittany
+
+#+name: UYf8t2jK947SsoZwCNnRps
+#+begin_src emacs-lisp :tangle no :noweb-ref apheleia-config
+(defun my-apheleia-hlint-and-brittany ()
+  (interactive)
+  (apheleia-format-buffer
+   (alist-get 'hlint apheleia-formatters)
+   (lambda ()
+     (apheleia-format-buffer
+      (alist-get 'brittany apheleia-formatters)
+      (lambda ()
+        (message "Formatted!"))))))
+#+end_src
+
+** TODO diffs using ediff
+
+**** broken because of no trailing newline?
+
+#+name: XHDXZAwMkWcf34gaACBqS3
+#+begin_example
+ediff-prepare-error-list: Errors in diff output.  Diff output is in #<buffer *ediff-diff*>
+#+end_example
+
+** TODO http testing with restclient and org-babel
+
+  #+begin_src nix :noweb-ref emacs-package :tangle no
+      restclient
+
+    ob-restclient
+  #+end_src
+
+#+begin_src emacs-lisp :noweb yes
+  (use-package ob-restclient)
+  (use-package restclient
+    :config
+
+    <<restclient-config>>
+    )
+#+end_src
+
+
+#+begin_src emacs-lisp :noweb-ref org-babel-languages :tangle no
+  (restclient . t)
+#+end_src
+
+
+
+** TODO nix mode
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+nix-mode
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package nix-mode
+  :mode "\\.nix\\'")
+#+end_src
+
+
+** TODO direnv mode
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+direnv
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package direnv
+    :init
+    :config
+    ;; changing directory in eshell should force direnv-update
+    (add-hook 'eshell-directory-change-hook #'direnv-update-directory-environment)
+    (direnv-mode))
+#+end_src
+
+
+** TODO org-protocol
+
+*** emacsclient is already working
+
+*** TODO install org-protocol
+
+hmm this sin't in nix packages? Weird... maybe it's bundled with org-roam?
+
+#+begin_src nix :noweb-ref disabled-emacs-package :tangle no
+org-protocol
+#+end_src
+
+*** TODO configure org-protocol
+
+#+name: NaWpQEG3bxopnNyCiaHJHo
+#+begin_src emacs-lisp
+(use-package org-protocol)
+#+end_src
+
+** A readable or export option for plain text
+
+*** github flavored markdown   
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+ox-gfm
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package ox-gfm)
+  #+end_src
+
+*** asciiDoc
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+ox-asciidoc
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package ox-asciidoc)
+  #+end_src
+  
+
+
+
+** kill microsoft teams when audio device changes damon
+
+*** you can listen to device changes with
+
+#+name: nH9XrY2TSa9PfVYmzDegMd
+#+begin_example
+❯ pactl subscribe
+Event 'change' on server #4294967295
+Event 'change' on source-output #29
+Event 'change' on source-output #30
+#+end_example
+
+
+*** I can make a systemd unit based on a simple shell script that listens to that
+  
+**** systemd you unit example      
+
+#+name: WbMX8ACrXUhXaHB6Gjc3nA
+#+begin_example
+systemd.user.services.ipfs-daemon = {
+   description = "IPFS Daemon";
+   serviceConfig = {
+     Type = "forking";
+     ExecStart = "${pkgs.ipfs}/bin/ipfs daemon";
+     ExecStop = "pkill ipfs";
+     Restart = "on-failure";
+   };
+   wantedBy = [ "default.target" ];
+ };
+#+end_example
+
+**** TODO systemd unit based on the above
+
+
+
+** read pdfs with emacs
+
+*** configuration
+
+**** opens pdfs with emacs
+
+#+begin_src nix :noweb-ref pdf-tools-config :tangle no
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . emacs))
+  #+end_src
+
+**** activate pdf-tools
+
+#+begin_src nix :noweb-ref pdf-tools-config :tangle no
+(pdf-tools-install)
+  #+end_src
+
+
+
+*** Install package with nix
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+  pdf-tools
+#+end_src
+
+
+*** use-package stanza
+
+#+begin_src emacs-lisp :noweb yes
+  (use-package pdf-tools
+    :config
+    <<pdf-tools-config>>
+    )
+    #+end_src
+
+
+** org-web-tools
+
+*** configuration
+
+
+**** this does nothing
+
+#+begin_src nix :noweb-ref org-web-tools-config :tangle no
+  (message "configuration for org-web-tools")
+  #+end_src
+
+
+*** Install package with nix
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+  org-web-tools
+#+end_src
+
+
+*** use-package stanza
+
+#+begin_src emacs-lisp :noweb yes
+  (use-package org-web-tools
+    :config
+    <<org-web-tools-config>>
+    )
+    #+end_src
+
+
+*** fixes I need to do
+
+****  TODO fix [[help:org-web-tools-archive-attach]]
+
+Just seems to time out for some reason
+
+
+* Appearance
+
+** Use a readable font
+
+   The default is far too small
+
+   #+name: WHAd2Pc32dfqFDCXCg7TQr
+   #+begin_src emacs-lisp
+   (set-frame-font "DejaVu Sans Mono-14")
+   #+end_src
+
+   
+** Use a nice theme
+
+   #+begin_src emacs-lisp
+   (load-theme 'modus-vivendi t)
+   #+end_src
+
+
+** make sure proper org attribues use fixed-pitch
+
+#+name: QRphrQvPkGacALhaaMmbHW
+#+begin_src emacs-lisp
+  ;; Make sure org-indent face is available
+  (require 'org-indent)
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'company-tooltip nil :inherit 'fixed-pitch)
+#+end_src
+
+
+** center or buffers with olivetti
+
+*** configuration
+
+**** this does nothing
+
+#+begin_src nix :noweb-ref olivetti-config :tangle no
+  (message "configuration for olivetti")
+  #+end_src
+
+*** Install package with nix
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+  olivetti
+#+end_src
+
+*** use-package stanza
+
+#+begin_src emacs-lisp :noweb yes
+  (use-package olivetti
+    :config
+    <<olivetti-config>>
+    ;; TODO make hook and custom literate and upstream to a snippet template
+    :hook ((org-mode . olivetti-mode)
+             (org-mode . org-indent-mode))
+    :custom
+      (olivetti-body-width 0.65)
+      (olivetti-minimum-body-width 65)
+    )
+    #+end_src
+
+
+* Elisp libraries that make life easier
+
+** f (file-path handling)
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+f
+#+end_src
+
+
+** TODO s (string-manipulation)
+
+
+* Weave/tangle nix overlays
+  
+** emacs
+  
+*** tangle overlay with emacs packages
+
+ #+BEGIN_SRC nix :tangle ../../../../users/profiles/emacs/emacs-packages.nix :noweb yes :mkdirp yes
+epkgs: with epkgs; [
+  <<emacs-package>>
+]
+
+ #+END_SRC
+
+
+*** tangle module with emacs system dependencies
+
+ #+BEGIN_SRC nix :tangle ../../../../profiles/develop/emacs/default.nix :noweb yes :mkdirp yes
+ { pkgs, ... }: {
+
+   environment.systemPackages = with pkgs; [
+     <<emacs-system-dep>>
+   ];
+ }
+ #+end_src
+
+
+*** tangle emacs early-init.el
+
+
+* Tangle/reload on save
+
+** make sure our local variables are marked as safe to avoid prompt
+#+begin_src emacs-lisp :noweb yes
+  (setq safe-local-variables-values '())
+  (add-to-list 'safe-local-variables-values
+               '((cons nil '(add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t))
+               (cons nil '(add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t))
+               ))
+#+end_src
+** TODO look into faster alternatives for tangling
+
+Worgle is best candidate:
+
+https://github.com/paulbatchelor/worgle
+
+Simple C program, is it on nix packages?
+
+https://www.reddit.com/r/orgmode/comments/9kp8pq/a_faster_way_to_tangle_orgmode_a_command_line/
+
+https://www.reddit.com/r/orgmode/comments/75r7eg/orgbabeltangle_painfully_slow/
+
+(404, maybe findable) https://github.com/xieyuheng/org-rs/tree/master/org-tangle
+
+** TODO only tangle if edit occurs in babel elisp source block or nix block?
+
+This is probably a project in it's own right that would require hashing all contents of all babel and nix source blocks, saving the checksum, then comparing current checksums on each save.
+
+Or (faster, less reliable) doing it in the background with a timer, and at the time of save compare a global variable the timer code is leaving as "not modified" or flagging as "modified".
+
+** TODO don't start an eshell if the tangle happens from saving readme.org
+
+Set some global variable like =tangled-from-config-save= to true and then guard our eshell block with =when (not tangled-from-config-save)=
+
+** the local variables
+# Local Variables:
+# eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t)
+# eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t)
+# End:

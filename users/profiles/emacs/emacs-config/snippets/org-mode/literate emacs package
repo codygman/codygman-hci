@@ -1,0 +1,25 @@
+# key: literate-emacs-package
+# name: literate emacs package
+# --
+*** configuration
+
+**** this does nothing
+
+#+begin_src nix :noweb-ref $1-config :tangle no
+(message "configuration for $1")
+#+end_src
+
+*** Install package with nix
+
+#+begin_src nix :noweb-ref emacs-package :tangle no
+$1
+#+end_src
+
+*** use-package stanza
+
+#+begin_src emacs-lisp :noweb yes
+(use-package $1
+  :config
+  <<$1-config>>
+)
+#+end_src

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: sh 
+# key: sh
+# --
+#+name: `(string-trim (shell-command-to-string "shortuuid"))`
+#+begin_src sh
+$1
+#+end_src
+$0

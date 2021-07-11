@@ -8,3 +8,10 @@ iso
 doi
 
 pkgs/_sources/.shake*
+/users/profiles/emacs/emacs-config/.cache/
+/users/profiles/emacs/emacs-config/.org-id-locations
+/users/profiles/emacs/emacs-config/bookmarks
+/users/profiles/emacs/emacs-config/forge-database.sqlite
+/users/profiles/emacs/emacs-config/tmp/
+/users/profiles/emacs/emacs-config/vanilla.el
+/users/profiles/emacs/emacs-config/vanilla.el~

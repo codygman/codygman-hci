@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: calc
+# key: calc
+# --
+#+begin_src calc
+$1
+#+end_src
+$0

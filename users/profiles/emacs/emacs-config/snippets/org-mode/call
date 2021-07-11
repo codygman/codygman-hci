@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: call
+# key: call
+# --
+#+call: $1
+$0

@@ -1,0 +1,8 @@
+# key: sql
+# name: sql
+# --
+#+name: `(string-trim (shell-command-to-string "shortuuid"))`
+#+begin_src sql
+$1
+#+end_src
+$0

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: elisp
+# key: elisp
+# --
+#+name: `(string-trim (shell-command-to-string "shortuuid"))`
+#+begin_src emacs-lisp
+$1
+#+end_src
+$0
