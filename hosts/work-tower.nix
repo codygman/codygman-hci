@@ -2,7 +2,7 @@
 {
   imports = [
     ./work-tower/configuration.nix
-  ] ++ suites.remotedev;
+  ] ++ suites.hci;
 
   location.provider = "manual";
   location.latitude = 32.7767;
