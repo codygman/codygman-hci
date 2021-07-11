@@ -1,4 +1,48 @@
+{pkgs}:
+
 epkgs: with epkgs; [
-  apheleia-mode
+  modus-themes
+  pkgs.apheleia-mode
+  f
+  use-package
+  exwm
+  exwm-edit
+  yasnippet
+  github-review
+  forge
+  sx
+  org-super-agenda
+  origami
+  selectrum
+  orderless
+  projectile
+  consult-flycheck
+  consult
+  
+  marginalia
+  docker-tramp
+  esh-autosuggest
+  fish-completion
+  docker
+  vterm
+  org-roam
+  org-roam-server
+  magit
+  magit-delta
+  which-key
+  haskell-mode
+  lsp-mode
+  lsp-haskell
+  lsp-ui
+    restclient
+  
+  ob-restclient
+  nix-mode
+  direnv
+  ox-gfm
+  ox-asciidoc
+  pdf-tools
+  org-web-tools
+  olivetti
   f
 ]
