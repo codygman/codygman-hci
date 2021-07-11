@@ -27,6 +27,7 @@ in
       nmap
       ripgrep
       skim
+      sqlite # TODO move to own place. added for: org-roam
       tealdeer
       usbutils
       utillinux
