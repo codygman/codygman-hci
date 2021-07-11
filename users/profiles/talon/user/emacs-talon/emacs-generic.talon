@@ -34,7 +34,7 @@ line kill:
 
 configuration go:
   user.emacs_command("find-file-other-window")
-  user.insert_formatted("/home/cody/hci/users/profiles/emacs/vanilla.org", "NOOP")
+  user.insert_formatted("/home/cody/hci/users/profiles/emacs/emacs-config/vanilla.org", "NOOP")
   key(enter)
 
 # TODO how do you make an alias for some other action already defined?
