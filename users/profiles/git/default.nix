@@ -1,11 +1,13 @@
 {
   programs.git = {
     enable = true;
-
+    userName = "codygman";
+    userEmail = "cody@codygman.dev";
     extraConfig = {
-      pull.rebase = false;
+      github = {
+        user = "codygman";
+      };
     };
-
     aliases = {
       a = "add -p";
       co = "checkout";
