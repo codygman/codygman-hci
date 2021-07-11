@@ -18,3 +18,5 @@ pkgs/_sources/.shake*
 /users/profiles/emacs/emacs-config/recentf
 /users/profiles/emacs/emacs-config/transient/
 /pkgs/applications/misc/talon-voice/beta-src.nix
+/users/profiles/emacs/emacs-config/eshell/history
+/users/profiles/emacs/emacs-config/eshell/lastdir
