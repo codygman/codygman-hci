@@ -237,6 +237,14 @@ emacsGcc
       (async-shell-command (format "cd ~/hci/ && nix-shell --run \"sudo nixos-rebuild switch --flake .#%s\"" system-name))
      )
 #+end_src
+*** rebuild home
+#+begin_src emacs-lisp
+    (defun rebuild-nix-home-configuration ()
+  (interactive)
+      (async-shell-command (format "cd ~/hci/ && nix-shell --run \"bud home tower cody\"" system-name))
+     )
+#+end_src
+
 
 *** update
 #+name: Q6r6uUnVtfhsrRwa2Cb9rA

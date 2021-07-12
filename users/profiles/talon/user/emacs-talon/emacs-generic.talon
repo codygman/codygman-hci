@@ -412,6 +412,9 @@ kill ring <user.text>$:
 (next three build | next rebuilt | nicks rebuild):
     user.emacs_command("rebuild-nix-configuration")
 
+(nix | nick's) home rebuild:
+    user.emacs_command("rebuild-nix-home-configuration")
+
 [(nix | nick)] (update and rebuild | nick update):
   user.emacs_command("update-and-rebuild-nix-configuration")
 
