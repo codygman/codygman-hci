@@ -3,7 +3,7 @@
 
   users.users.cody = {
     uid = 1000;
-    password = "cody";
+    hashedPassword = "$6$Q4SekQ.6QMOg0XpD$FtX/A4tT21In7CsuS5RFM90KfJ6OtBM4jZ.Et2wv3wRTr/mCXyldeyFyrsk.nd3wMKlpVMe7QhwDN52HZSVLJ1";
     description = "default";
     isNormalUser = true;
     # TODO shouldn't have to manually add networkmanager group
