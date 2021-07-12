@@ -24,15 +24,9 @@
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.enp37s0.useDHCP = true;
-
-  # no longer useful network interfaces?
-  # networking.interfaces.br-58c47fe7293f.useDHCP = true;
-  # networking.interfaces.docker0.useDHCP = true;
-  # networking.interfaces.vboxnet0.useDHCP = true;
-  # networking.interfaces.vetha3492ef.useDHCP = true;
-  # networking.interfaces.vethad8632f.useDHCP = true;
-  # networking.interfaces.vethce366cf.useDHCP = true;
+  networking.interfaces.docker0.useDHCP = true;
+  networking.interfaces.enp34s0.useDHCP = true;
+  networking.interfaces.wlp36s0.useDHCP = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -44,6 +38,10 @@
   #   font = "Lat2-Terminus16";
   #   keyMap = "us";
   # };
+
+  # Enable the X11 windowing system.
+  # services.xserver.enable = true;
+
 
   
 
@@ -99,7 +97,7 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "20.09"; # Did you read the comment?
+  system.stateVersion = "21.05"; # Did you read the comment?
 
 }
 

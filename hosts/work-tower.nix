@@ -1,7 +1,8 @@
 { suites, pkgs, ... }:
 {
   imports = [
-    ./work-tower/configuration.nix
+    # ./work-tower/configuration.nix
+    ../up/tower/configuration.nix
   ] ++ suites.hci;
 
   location.provider = "manual";

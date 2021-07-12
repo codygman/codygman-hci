@@ -101,6 +101,7 @@
           /* set host specific properties here */
           NixOS = { };
           tower = { };
+          work-tower = { };
         };
         importables = rec {
           profiles = digga.lib.importers.rakeLeaves ./profiles // {
