@@ -2,7 +2,7 @@
 {
   imports = [
     # ./work-tower/configuration.nix
-    ../up/tower/configuration.nix
+    ../up/work-tower/configuration.nix
   ] ++ suites.hci;
 
   location.provider = "manual";
