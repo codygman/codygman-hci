@@ -1,0 +1,3 @@
+[submodule "users/profiles/talon/user/knausj_talon"]
+	path = users/profiles/talon/user/knausj_talon
+	url = git@github.com:codygman/knausj_talon.git
