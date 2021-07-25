@@ -219,6 +219,11 @@ use-package
     (add-to-list 'org-file-apps '("\\.flac\\'" . "cvlc --play-and-exit %s"))
 #+end_src
 
+#+name: hsv2zwj2JGkSz7HMuaQkHm
+#+begin_src emacs-lisp
+    (add-to-list 'org-file-apps '("\\.mp4\\'" . "mpv %s"))
+#+end_src
+
 
 ** install emacs
 
