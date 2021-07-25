@@ -20,6 +20,7 @@ in
 	turtle
 	raw-strings-qq
 	neat-interpolation
+        servant
 	servant-serf
 	witch
       ])
