@@ -1,5 +1,4 @@
 {pkgs}:
-
 epkgs: with epkgs; [
   modus-themes
   pkgs.apheleia-mode

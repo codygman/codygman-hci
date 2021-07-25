@@ -2602,7 +2602,11 @@ f
 *** tangle overlay with emacs packages
 
  #+BEGIN_SRC nix :tangle ../../../../users/profiles/emacs/emacs-packages.nix :noweb yes :mkdirp yes
+{pkgs}:
 epkgs: with epkgs; [
+  modus-themes
+  pkgs.apheleia-mode
+  f
   <<emacs-package>>
 ]
 
