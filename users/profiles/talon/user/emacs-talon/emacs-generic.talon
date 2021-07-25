@@ -760,5 +760,16 @@ macro execute:
 #fast food spiral:
 # https://ordering.incentivio.com/client/ed0832d3-51b9-491e-bbe1-9b34d3106b7c/store/#
 
+time stamp today:
+  key(ctrl-c .)
+  key(enter)
+
+time stamp day:
+  key(ctrl-c .)
+
+time stamp now:
+  key(ctrl-u ctrl-c .)
+  key(enter)
+
 my pixel media:
   user.emacs_command("my/pixel-4-xl-media")
