@@ -3,7 +3,7 @@
 let inherit (builtins) readFile;
 in
 {
-  imports = [ ./i3 ./qutebrowser ];
+  imports = [ ./i3 ./qutebrowser ./im ];
   hardware.opengl.driSupport = true;
   hardware.pulseaudio.enable = true;
   hardware.opengl.enable = true;
