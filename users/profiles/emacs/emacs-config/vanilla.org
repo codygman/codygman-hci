@@ -2480,17 +2480,28 @@ Just seems to time out for some reason
 (setq-default dired-omit-files-p t)
 (setq dired-omit-files
     (concat dired-omit-files "\\|^\\..+$"))
+;; (dired-omit-mode 1)
+#+end_src
+
+*** sort by most recent time stamp
+
+#+name: sort-most-recent-timestamp
+#+begin_src emacs-lisp
+  ;; This seems to work
+  (dired-sort-toggle-or-edit)
+  (beginning-of-buffer)
 #+end_src
 
 
 *** provide =my/pixel-4-xl-media=
 
 #+name: EeBeWmaPUzLRvB9rRHbNuQ
-#+begin_src emacs-lisp :noweb yes
+#+begin_src emacs-lisp :noweb yes :tangle yes
   (defun my/pixel-4-xl-media ()
     (interactive)
     <<exclude-trashed-syncthing-files>>
     <<open-pixel-media-dired>>
+    <<sort-most-recent-timestamp>>
     )
 #+end_src
 
