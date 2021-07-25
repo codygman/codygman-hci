@@ -1,8 +1,6 @@
-
 app: Emacs
 app: emacs
 -
-
 command help:
   user.emacs_command("dired-other-window")
 #   user.insert_formatted("/home/cody/hci/users/profiles/talon/user/emacs-talon/modes" + user.emacs_mode, "NOOP")
@@ -761,3 +759,6 @@ macro execute:
 
 #fast food spiral:
 # https://ordering.incentivio.com/client/ed0832d3-51b9-491e-bbe1-9b34d3106b7c/store/#
+
+my pixel media:
+  user.emacs_command("my/pixel-4-xl-media")
