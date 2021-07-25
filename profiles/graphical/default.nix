@@ -59,5 +59,14 @@ in
     enable = false;
     user = "cody";
   };
+
+  services.syncthing = {
+    enable = true;
+    openDefaultPorts = true;
+    configDir = "/home/cody/.config/syncthing";
+    user = "cody";
+    group = "users";
+  };
+
   
 }
