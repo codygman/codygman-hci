@@ -70,11 +70,14 @@ subheading no:
 
 # org-roam
 (roam | rome ) link insert:
-  user.emacs_command("org-roam-insert")
+  user.emacs_command("org-roam-node-insert")
 
-roam insert <user.text>$:
-  user.emacs_command("org-roam-insert")
+roam link insert <user.text>$:
+  user.emacs_command("org-roam-node-insert")
   user.insert_formatted(text, "NOOP")
+
+(roam | rome ) back links:
+  user.emacs_command("org-roam-buffer-toggle")
 
 source next:
   # user.emacs_command("org-babel-next-src-block")
