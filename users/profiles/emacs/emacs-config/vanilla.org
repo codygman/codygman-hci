@@ -256,7 +256,7 @@ emacsGcc
 #+begin_src emacs-lisp
   (defun update-and-rebuild-nix-configuration ()
   (interactive)
-      (async-shell-command "cd ~/devos2/ && nix-shell --run \"flk update\" && nix-shell --run \"flk tower switch\"")
+      (async-shell-command "cd ~/hci/ && nix-shell --run \"bud update\" && nix-shell --run \"bud tower switch\"")
      )
 #+end_src
 
