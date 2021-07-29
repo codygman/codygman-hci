@@ -36,4 +36,36 @@
     enable = true;
   };
 
+
+  
+  environment = {
+
+    systemPackages = with pkgs; [
+
+      pavucontrol
+    ];
+  };
+
+  services.blueman.enable = true;
+
+  hardware.opengl.driSupport32Bit = true;
+  hardware.pulseaudio = {
+    enable = true;
+    support32Bit = true;
+    package = pkgs.pulseaudioFull;
+    extraModules = [pkgs.pulseaudio-modules-bt ];
+    extraConfig = "
+       load-module module-switch-on-connect
+    ";
+  };
+
+  hardware.bluetooth = {
+    enable = true;
+    settings = {
+      General = {
+        Enable = "Source,Sink,Media,Socket";
+      };
+    };
+  };
+
 }
