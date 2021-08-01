@@ -739,9 +739,6 @@ my projects:
   key(ctrl-c ctrl-n)
   key(ctrl-e)
 
-# TODO move this to talon specific mode when I set it up
-to do:   user.insert_formatted(" TODO ", "NOOP")
-
 # TODO figure out how to do or block specific things from within or mode if possible
 # this is just to start an s-expression
 essex:

@@ -147,3 +147,12 @@ export options:
 
 property:
     key(ctrl-c ctrl-x p)
+
+done:
+  key(ctrl-c ctrl-t d)
+
+todo:
+  key(ctrl-c ctrl-t t)
+
+(kill | cancel):
+  key(ctrl-c ctrl-t k)
