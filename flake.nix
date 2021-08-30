@@ -7,8 +7,8 @@
 
   inputs =
     {
-      nixos.url = "nixpkgs/nixos-unstable";
-      latest.url = "nixpkgs";
+      nixos.url = "github:nixos/nixpkgs/release-21.05";
+      latest.url = "github:nixos/nixpkgs/nixos-unstable";
 
       digga.url = "github:divnix/digga";
       digga.inputs.nixpkgs.follows = "nixos";
@@ -155,7 +155,7 @@
       }
     //
     {
-      budModules = { devos = import ./pkgs/bud; };
+      budModules = { devos = import ./bud; };
     }
   ;
 }
