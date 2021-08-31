@@ -25,6 +25,10 @@ copy file path: key(ctrl-u 0 w)
 (audio stop | stop audio):
   user.system_command_nb("pkill -f cvlc")
 
+(video play | play video):
+  user.emacs_command("dired-do-async-shell-command")
+  user.insert_formatted("mpv", "NOOP")
+  key(enter)
 
 the red quit: key(q)
 
