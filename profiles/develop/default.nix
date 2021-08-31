@@ -2,6 +2,11 @@
 
   imports = [ ./haskell  ];
 
+ nixpkgs.config = {
+    allowUnfree = true;
+    chromium.enableWideVine = true;
+ };
+
   security.pam.loginLimits = [{
     domain = "*";
     type = "soft";
@@ -26,7 +31,7 @@
     sqlite # for org-roam, so for work/personal really
     teams # should go somewhere else? work.im maybe?
     zoom-us
-
+    chromium
     firefox
     file
     gnupg
