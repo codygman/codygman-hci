@@ -13,6 +13,7 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+  services.gvfs.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
 
   fileSystems."/" =
