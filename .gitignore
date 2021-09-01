@@ -20,3 +20,6 @@ pkgs/_sources/.shake*
 /pkgs/applications/misc/talon-voice/beta-src.nix
 /users/profiles/emacs/emacs-config/eshell/history
 /users/profiles/emacs/emacs-config/eshell/lastdir
+/users/profiles/emacs/emacs-config/image-dired/
+/users/profiles/emacs/emacs-config/tramp
+/profiles/develop/emacs/config/
