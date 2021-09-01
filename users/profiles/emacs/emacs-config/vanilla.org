@@ -2540,7 +2540,7 @@ Just seems to time out for some reason
 
 *** "My pixel media"                                                :talon:
 
-#+begin_src plain :noweb-ref talon-emacs-generic-commands
+#+begin_src plain :tangle no :noweb-ref talon-emacs-generic-commands
 my pixel media:
   user.emacs_command("my/pixel-4-xl-media")
 #+end_src
