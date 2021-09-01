@@ -2,6 +2,34 @@
 #+STARTUP: overview
 #+PROPERTY: header-args :results silent :tangle yes
 
+* TODO description like codygman/hci [[https://github.com/codygman/hci/blob/ca8e21033c0626b0b147720f238fb945c293e465/readme.org][used to have]]
+
+** important points top of mind now
+
+*** talon speech to text
+
+**** context sensitive in emacs
+
+**** emacs slowness via tcp when not using keybinds
+
+*** literate nix configuration preserving modularity in nix source
+
+*** making org tangling faster
+
+*** future desire for =org-tanglesync= to avoid org tangle slowness/debugging/testing
+
+*** tracking keyboard usage in characters using logkeys
+
+*** how literate configurations are good for emergent/piecemeal software constructions you can drop/resume at will
+
+**** good for not getting stuck
+
+**** good for being able to make small chunks of process
+
+**** godo for being able to just drop things when they start annoying you but not forget
+
+*** reasons for move from evil to vanilla, and possibly back again
+
 * Handle configuration with use-package
 
 ** setup use-package
