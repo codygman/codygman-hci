@@ -1,0 +1,26 @@
+* counting characters typed on keyboard per session
+
+** starting logkeys
+
+#+name: 4xwj99aktHxrfUv5os6XeL
+#+begin_src sh :eval no
+sudo logkeys -s -o ~/.keylogs.log -d /dev/input/event4 --timestamp-every
+#+end_src
+
+
+** a function to get total lines of keylog file
+
+#+name: keylog-file-lines
+#+begin_src sh :dir /sudo::
+wc -l /home/cody/.keylogs.log
+#+end_src
+
+
+** backup old file
+
+#+name: backup-older-keylog
+#+begin_src sh :dir /sudo::
+mv -b /home/cody/.keylogs.log /home/cody/.bak.keylogs.log
+#+end_src
+
+#+RESULTS: backup-older-keylog
